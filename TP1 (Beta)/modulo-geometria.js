@@ -5,10 +5,14 @@ class Objeto3D {
 
         this.mallaDeTriangulos = null;
         this.matrizModelado = mat4.create();
-
+        
         this.traslacion = vec3.fromValues(0,0,0); 
         this.rotacion = vec3.fromValues(0,0,0); 
         this.escala = vec3.fromValues(1,1,1); 
+
+        this.posicionAcumulada = vec3.fromValues(0,0,0); 
+        this.rotacionAcumulada = vec3.fromValues(0,0,0); 
+        this.escalaAcumulada = vec3.fromValues(1,1,1); 
         
         this.hijos = [];
 
@@ -29,8 +33,6 @@ class Objeto3D {
 
 	actualizarMatrizModelado() {
 		
-		//mat4.identity(this.matrizModelado);
-
 		mat4.translate(this.matrizModelado, this.matrizModelado, this.traslacion);
         
         mat4.rotateX(this.matrizModelado, this.matrizModelado, this.rotacion[0]);
@@ -74,20 +76,40 @@ class Objeto3D {
 		}
 	}
 
+    quitarHijo() {
+		return this.hijos.pop();
+	}
+
     setTraslacion(x, y, z) {
 		vec3.set(this.traslacion, x, y, z);
+        this.posicionAcumulada[0]+=x;
+        this.posicionAcumulada[1]+=y;
+        this.posicionAcumulada[2]+=z;
         this.actualizarMatrizModelado();
 	}
 
 	setRotacion(x, y, z) {
 		vec3.set(this.rotacion, x, y, z);
+        this.rotacionAcumulada[0]+=x;
+        this.rotacionAcumulada[1]+=y;
+        this.rotacionAcumulada[2]+=z;
         this.actualizarMatrizModelado();
 	}
 
 	setEscala(x, y, z) {
 		vec3.set(this.escala, x, y, z);
+        this.escalaAcumulada[0]*=x;
+        this.escalaAcumulada[1]*=y;
+        this.escalaAcumulada[2]*=z;
         this.actualizarMatrizModelado();
 	}
+
+    cambiarRotacionAcumulada(x,y,z){
+        this.rotacionAcumulada[0]= x;
+        this.rotacionAcumulada[1]= y;
+        this.rotacionAcumulada[2]= z;
+    }
+
 }
 
 function dibujarMallaDeTriangulos(mallaDeTriangulos){

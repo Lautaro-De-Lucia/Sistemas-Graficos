@@ -20,6 +20,13 @@
         <script src="modulo-geometria.js"></script>
         <script src="Camera.js"></script>
         <script src="droneCamera.js"></script>
+        <script src="utilsEscena.js"></script>
+        <script src="Grua.js"></script>
+        <script src="gruaControl.js"></script>
+        <script src="cameraControl.js"></script>
+
+
+
         
         <script id="shader-vs" type="x-shader/x-vertex">
 
@@ -128,14 +135,16 @@
             // -------------
 
             // objetos
-
+            var grua;
+            var controladorGrua;
             var objetos = [];
+            //var escaladoSoga = 50;
 
             // agregar camaras acá
 
             let camera = null;
             let droneCam = null;
-            
+            var camaraActual = null;
             // WebGL Initialization
          
             function initWebGL(){
@@ -156,7 +165,8 @@
                     setupWebGL();
                     setupDroneCamera(); // o setupCamera(); para la primera cámara
                     initShaders();
-                    crearObjetos();
+                    setupPlayground();
+                    setupControles();
                     setupVertexShaderMatrix();
                     setupFragmentShaderMatrix();                    
                     start();   
@@ -256,154 +266,23 @@
                 mat4.translate(viewMatrix,viewMatrix, [0.0, 0.0, -15.0]);
             }
 
-            //Función auxiliar para los colores
-            function vectorRGB (R,G,B) {
-                return vec4.fromValues(R/255.0,G/255.0,B/255.0,1.0,1.0);
+            function setupControles() {
+
+                controladorGrua = new ControlGrua();
             }
 
-            function crearObjetos() {
+            function setupPlayground() {
 
-                //una Ayudita
-                var ejesAuxiliares = new Ejes();
+                //Agrego los elementos a dibujarse al arreglo de objetos
 
-                // piso
-                var piso = new Cuadrado(10,20,100,vectorRGB(255,255,190));
+                var piso = new Cuadrado(MFil,MCol,100,RGB(255,255,190));
                         objetos.push(piso);
 
-                // Edificio
-                var templateEdificio = new Cubo(10,20,10,vectorRGB(150,150,150));
-                    templateEdificio.setEscala(1,3,1);
-                    templateEdificio.setTraslacion(10,10/2,10);
-                        objetos.push(templateEdificio);
+                grua = new Grua();
+                grua.agregarEjes();
+                grua.agregarALaEscena(objetos);   
 
-                //Base de la Grua
-                var base = new Objeto3D();
-                var baseGruaRectangulo1 = new Cubo(10,20,2,vectorRGB(255,255,0));
-                    baseGruaRectangulo1.setEscala(1,3,1);
-                    baseGruaRectangulo1.setTraslacion(0,1,0);
-                        base.agregarHijo(baseGruaRectangulo1);
-                var baseGruaRectangulo2 = new Cubo(10,20,2,vectorRGB(255,255,0));
-                    baseGruaRectangulo2.setEscala(0.75,3,0.75);
-                    baseGruaRectangulo2.setTraslacion(0,3,0);
-                        base.agregarHijo(baseGruaRectangulo2);
-                var baseGruaCilindro = new Cilindro(10,20,0.5,6,vectorRGB(200,200,200));
-                    baseGruaCilindro.setTraslacion(0,15,0);
-                        base.agregarHijo(baseGruaCilindro);
-                        objetos.push(base);
                 
-                //Cabina
-                var cabina = new Objeto3D();
-                var habitaculo = new Cubo(10,20,1,vectorRGB(255,255,0));
-                    habitaculo.setEscala(2,1,1);
-                        cabina.agregarHijo(habitaculo);
-                var techo = new Cubo(10,20,0.2,vectorRGB(0,0,0));
-                    techo.setTraslacion(0,0.45,0.9);
-                    techo.setEscala(10,0.5,4);
-                        cabina.agregarHijo(techo);
-                var piso = new Cubo(10,20,0.2,vectorRGB(0,0,0));
-                    piso.setTraslacion(0,-0.45,1.4);
-                    piso.setEscala(10,0.5,9);
-                        cabina.agregarHijo(piso);
-                var varandaFrontal = new Cubo(10,20,0.2,vectorRGB(100,100,100));
-                    varandaFrontal.setTraslacion(0,-0.2,2.2);
-                    varandaFrontal.setEscala(10,2,1);
-                        cabina.agregarHijo(varandaFrontal);               
-                var varandaIzquierda = new Cubo(10,20,0.2,vectorRGB(100,100,100));
-                    varandaIzquierda.setTraslacion(0.90,-0.2,1.3);
-                    varandaIzquierda.setEscala(1,2,8);
-                        cabina.agregarHijo(varandaIzquierda); 
-                var varandaDerecha = new Cubo(10,20,0.2,vectorRGB(100,100,100));
-                    varandaDerecha.setTraslacion(-0.90,-0.2,1.3);
-                    varandaDerecha.setEscala(1,2,8);
-                        cabina.agregarHijo(varandaDerecha);  
-                var soportePoleaIzquierda = new Cubo(10,20,0.2,vectorRGB(100,60,30));
-                    soportePoleaIzquierda.setTraslacion(0.3,1,0);
-                    soportePoleaIzquierda.setEscala(1,5,2);
-                        cabina.agregarHijo(soportePoleaIzquierda);        
-                var soportePoleaDerecha = new Cubo(10,20,0.2,vectorRGB(100,60,30));
-                    soportePoleaDerecha.setTraslacion(-0.3,1,0);
-                    soportePoleaDerecha.setEscala(1,5,2);
-                        cabina.agregarHijo(soportePoleaDerecha);   
-                var poleaIzquierda = new Circulo(10,20,0.2,vectorRGB(180,180,180));
-                    poleaIzquierda.setTraslacion(0.41,1.2,0);
-                    poleaIzquierda.setRotacion(0,0,3.14/2);
-                        cabina.agregarHijo(poleaIzquierda);        
-                var poleaDerecha = new Circulo(10,20,0.2,vectorRGB(180,180,180));
-                    poleaDerecha.setTraslacion(-0.41,1.2,0);
-                    poleaDerecha.setRotacion(0,0,3.14/2);
-                        cabina.agregarHijo(poleaDerecha);                       
-                //Una vez armada la cabina la colocamos en la escena                
-                cabina.setTraslacion(0,19,-2);    
-                cabina.setEscala(2,2,2);
-                            objetos.push(cabina); 
-
-                //Brazo
-                var brazo = new Objeto3D();
-                    brazo.setTraslacion(0,21,0);
-                var viga = new Cubo(10,20,0.8,vectorRGB(255,255,0));
-                    viga.setTraslacion(0,0.5,5);
-                    viga.setEscala(1,1,30);
-                    brazo.agregarHijo(viga);
-                var contrapeso = new Cubo(10,20,2,vectorRGB(150,150,150));
-                    contrapeso.setTraslacion(0,0.5,-8);
-                    contrapeso.setEscala(2,1,1);
-                    brazo.agregarHijo(contrapeso);
-                var poleaIzquierdaViga = new Circulo(10,20,0.2,vectorRGB(180,180,180));
-                    poleaIzquierdaViga.setTraslacion(0.41,0.5,16.5);
-                    poleaIzquierdaViga.setRotacion(0,0,3.14/2);
-                        brazo.agregarHijo(poleaIzquierdaViga);        
-                 var poleaDerechaViga = new Circulo(10,20,0.2,vectorRGB(180,180,180));
-                    poleaDerechaViga.setTraslacion(-0.41,0.5,16.5);
-                    poleaDerechaViga.setRotacion(0,0,3.14/2);
-                        brazo.agregarHijo(poleaDerechaViga); 
-                        var poleaDerechaViga = new Circulo(10,20,0.2,vectorRGB(180,180,180));
-                    objetos.push(brazo);
-
-                //Soga y Plataforma
-                var sogaYPlataforma = new Objeto3D();
-                    sogaYPlataforma.setTraslacion(0,16.5,16.5);
-
-
-                var soga = new Cubo(10,20,0.1,vectorRGB(200,190,150));
-                    soga.setTraslacion(0,2.5,0);
-                    soga.setEscala(1,50,1);
-                    sogaYPlataforma.agregarHijo(soga);
-                var soga1 = new Cubo(10,20,0.1,vectorRGB(200,190,150));
-                    soga1.setRotacion(3.14/4,0,3.14/4);
-                    soga1.setTraslacion(0,-2.5,0);
-                    soga1.setEscala(1,50,1);
-                    sogaYPlataforma.agregarHijo(soga1);
-                var soga2 = new Cubo(10,20,0.1,vectorRGB(200,190,150));
-                    soga2.setRotacion(-3.14/4,0,3.14/4);
-                    soga2.setTraslacion(0,-2.5,0);
-                    soga2.setEscala(1,50,1);
-                    sogaYPlataforma.agregarHijo(soga2);
-                    var soga3 = new Cubo(10,20,0.1,vectorRGB(200,190,150));
-                    soga3.setRotacion(3.14/4,0,-3.14/4);
-                    soga3.setTraslacion(0,-2.5,0);
-                    soga3.setEscala(1,50,1);
-                    sogaYPlataforma.agregarHijo(soga3);
-                var soga4 = new Cubo(10,20,0.1,vectorRGB(200,190,150));
-                    soga4.setRotacion(-3.14/4,0,-3.14/4);
-                    soga4.setTraslacion(0,-2.5,0);
-                    soga4.setEscala(1,50,1);
-                    sogaYPlataforma.agregarHijo(soga4);
-                var plataforma = new Cubo(10,20,1,vectorRGB(100,60,30));
-                    plataforma.setTraslacion(0,-2.5,0);
-                    plataforma.setEscala(7.5,0.2,5.5);
-                    sogaYPlataforma.agregarHijo(plataforma);
-                        objetos.push(sogaYPlataforma);
-
-                //La grua en una pieza
-                var grua = new Objeto3D();
-                grua.agregarHijo(base);
-                grua.agregarHijo(cabina);
-                grua.agregarHijo(brazo);
-                grua.agregarHijo(sogaYPlataforma);
-                grua.setEscala(1,1,1);
-                objetos.push(grua);
-                
-
             }
 
             function drawScene(){
@@ -416,10 +295,21 @@
             }
             
             function start(){                
-                viewMatrix=droneCam.getViewMatrix();
+                
+                switch(camaraActual){
+                    case "cabina":
+                        viewMatrix=grua.obtenerVistaCabina();
+                        break;
+                    case "drone":
+                        viewMatrix=droneCam.getViewMatrix();
+                        break;
+                    default:
+                        viewMatrix = droneCam.getViewMatrix();
+                        break;    
+                }
 
                 requestAnimationFrame(start);
-
+                controladorGrua.update();
                 droneCam.update();
                 drawScene();
             }
