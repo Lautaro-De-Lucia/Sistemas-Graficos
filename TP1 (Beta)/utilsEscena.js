@@ -5,7 +5,7 @@ function RGB (R,G,B) {
 
 //Parametros de la escena
 
-var MFil = 10;
+var MFil = 5;
 var MCol = 20;
 
 

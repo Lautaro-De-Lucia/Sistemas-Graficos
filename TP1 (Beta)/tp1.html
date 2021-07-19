@@ -24,6 +24,7 @@
         <script src="Grua.js"></script>
         <script src="gruaControl.js"></script>
         <script src="cameraControl.js"></script>
+        <script src="camaraOrbital.js"></script>
 
 
 
@@ -145,6 +146,7 @@
             let camera = null;
             let droneCam = null;
             var camaraActual = null;
+            var camaraOrbital = null;
             // WebGL Initialization
          
             function initWebGL(){
@@ -165,6 +167,7 @@
                     setupWebGL();
                     setupDroneCamera(); // o setupCamera(); para la primera cámara
                     initShaders();
+                    setupCamaras();
                     setupPlayground();
                     setupControles();
                     setupVertexShaderMatrix();
@@ -271,6 +274,12 @@
                 controladorGrua = new ControlGrua();
             }
 
+            function setupCamaras() {
+
+            camaraOrbital = new OrbitalCameraControl([0,0,0]);
+            
+            }
+
             function setupPlayground() {
 
                 //Agrego los elementos a dibujarse al arreglo de objetos
@@ -303,6 +312,9 @@
                     case "drone":
                         viewMatrix=droneCam.getViewMatrix();
                         break;
+                    case "orbital": 
+                        viewMatrix = camaraOrbital.getViewMatrix();
+                        break;    
                     default:
                         viewMatrix = droneCam.getViewMatrix();
                         break;    
@@ -310,6 +322,7 @@
 
                 requestAnimationFrame(start);
                 controladorGrua.update();
+                camaraOrbital.update();
                 droneCam.update();
                 drawScene();
             }

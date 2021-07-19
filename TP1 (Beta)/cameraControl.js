@@ -11,6 +11,11 @@ document.addEventListener("keypress",function(camaras){
             
             camaraActual = "cabina";
             break;
+
+        case "3": // orbital camera
+
+            camaraActual = "orbital";
+            break;    
         
         default:
 
