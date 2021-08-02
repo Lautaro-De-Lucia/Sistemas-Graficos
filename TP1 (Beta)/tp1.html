@@ -1,20 +1,95 @@
 <!doctype html>
 <html>
     <head>
-        <title></title>        
+        <title>TP1 Lautaro De Lucia</title>        
         <style>
-            body{ background-color: #808080; }
+            body{ background-color: rgb(255, 255, 255); }
             canvas{ background-color: rgb(196, 228, 255); }
 			textarea{ background-color: black; color: white;}
+			h1 {
+  				color: rgb(54, 255, 47);
+                background-color: rgb(124, 124, 124);
+                text-align: center;
+			}
+            h2 {
+                text-align: center;
+            }
+            h3 {
+                text-align: center;
+            }
+            h4 {
+                text-align:center;
+            }
         </style>
     </head>
     <body>
 
-    	<center>    		            
-            <canvas id="my-canvas" width="1000" height="800">
-            	Your browser does not support the HTML5 canvas element.
-    		</canvas>    		
-    	</center>
+    	<center> 
+            <div id='canvas' style="position:-ms-page">
+                <canvas id="my-canvas" width="1300" height="800">
+                    Your browser does not support the HTML5 canvas element.
+                </canvas>   
+            </div>    
+            <right>   
+                <h1>
+                    Controles:<br>
+                </h1>	
+                <h2>
+                    Camaras:<br>
+                </h2>
+                <h4>   
+                    Vista camara drone: 1<br>
+                    Vista camara cabina: 2<br>
+                    Vista orbital: 3<br>
+                </h4>              
+                <h3>
+                Control de la CamaraDrone:<br>
+                </h3>
+                <h4> 
+                    Vista:<br><br>
+                    Arriba: w<br>
+                    Abajo: s<br>
+                    Rotar Derecha: d<br>
+                    Rotar Izquierda: a<br><br>
+                    Movimiento:<br><br>
+                    Adelante: ArrowUp<br>
+                    Atras: ArrowDown<br>
+                    Derecha: ArrowRight<br>
+                    Izquierda: ArrowLeft<br>
+                </h4>
+                <h2>
+                    Objetos:<br>
+                </h2>  
+                <h3>
+                Control de la Grua:<br>
+                </h3> 
+                <h4>
+                    Subir cabina: W<br>
+                    Bajar cabina: S<br>
+                    Rotar cabina: A/D<br>
+                    Rotar brazo: Q/Z<br>
+                    Subir/Bajar plataforma: E/C<br>
+                </h4> 
+                <h3>   
+                Control del Edificio:<br>
+                </h3>
+                <h4>
+                    Pisos Inferiores: R/F<br>
+                    Pisos Superiores: T/G<br>
+                    Columnas: Y/H<br>
+                    Ventanas: V/B/N/M<br>
+                <h4>  
+                <h3> 
+                Control del Tobogan:<br>
+                </h3>
+                <h4>  
+                    Niveles: U/J<br>
+                <h4>
+                <audio controls playsinline autoplay loop> 
+                    <source src = "01 - Brian Eno - 1-1.mp3">
+                </audio> 	
+            </right> 
+        </center>
 
         <!--Bibliotecas externas-->
         <script src="js/gl-matrix.js"></script>
@@ -309,7 +384,8 @@
                 edificioConsigna = new Edificio();
                     edificioConsigna.agregarALaEscena(escena);  
                 
-                /*Easter Eggs*/   
+                /*Easter Eggs*/  
+                /* 
                 var palacioDeKnossos = new Edificio([-40,-40,0],4,3,5,20,2,20,RGB(200,180,150),RGB(20,20,20),RGB(150,0,0));
                     palacioDeKnossos.agregarALaEscena(escena);
                 var panteon = new Edificio([40,-20,0],1,0,5,5,2,20,RGB(200,200,200),RGB(100,100,100),RGB(80,80,80));
@@ -317,7 +393,7 @@
                     panteon.agregarALaEscena(escena);
                 var torreDeBabel = new Edificio([0,-60,0],10,10,5,5,2,10,RGB(200,180,150),RGB(150,100,60),RGB(100,60,30));   
                     torreDeBabel.agregarALaEscena(escena);
-                
+                */
             }
 
             function dibujarEscena(){
