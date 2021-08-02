@@ -1,3 +1,5 @@
+Agrego temporariamente los controles en este readme.txt hasta que encuentre la forma de ponerlos en un display en el Canvas.
+
 Camaras:
   Vista camara drone: 1
   Vista camara cabina: 2
