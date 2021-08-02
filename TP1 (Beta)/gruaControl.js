@@ -13,8 +13,6 @@ function ControlGrua() {
 
     document.addEventListener("keypress",function(control){
 
-        console.log(control.key); 
-
         switch ( control.key ) {
 
             case "W": 
@@ -49,9 +47,9 @@ function ControlGrua() {
         deltaSC = 0;
         grua.bajarCabina(deltaBC/2);
         deltaBC = 0;
-        grua.rotacionHorariaCabina(deltaRHC/3);
+        grua.rotacionCabina(deltaRHC/3);
         deltaRHC = 0;
-        grua.rotacionAntiHorariaCabina(deltaRAC/3);
+        grua.rotacionCabina(-deltaRAC/3);
         deltaRAC = 0;
         grua.subirPlataforma(deltaSP);
         deltaSP = 0;

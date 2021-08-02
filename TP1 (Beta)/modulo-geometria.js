@@ -1,4 +1,3 @@
-
 class Objeto3D {
 
     constructor(filas = 10, columnas = 20) {
@@ -46,9 +45,8 @@ class Objeto3D {
         this.escala = vec3.fromValues(1,1,1); 
 	}
 
-    dibujar(matPadre) {
-
-		var m = mat4.create();
+    dibujar(matPadre = mat4.create()) {
+        var m = mat4.create();
 
 		mat4.multiply(m, matPadre, this.matrizModelado); 
 
@@ -80,7 +78,7 @@ class Objeto3D {
 		return this.hijos.pop();
 	}
 
-    setTraslacion(x, y, z) {
+    trasladar(x, y, z) {
 		vec3.set(this.traslacion, x, y, z);
         this.posicionAcumulada[0]+=x;
         this.posicionAcumulada[1]+=y;
@@ -88,7 +86,7 @@ class Objeto3D {
         this.actualizarMatrizModelado();
 	}
 
-	setRotacion(x, y, z) {
+	rotar(x, y, z) {
 		vec3.set(this.rotacion, x, y, z);
         this.rotacionAcumulada[0]+=x;
         this.rotacionAcumulada[1]+=y;
@@ -96,19 +94,13 @@ class Objeto3D {
         this.actualizarMatrizModelado();
 	}
 
-	setEscala(x, y, z) {
+	escalar(x, y, z) {
 		vec3.set(this.escala, x, y, z);
         this.escalaAcumulada[0]*=x;
         this.escalaAcumulada[1]*=y;
         this.escalaAcumulada[2]*=z;
         this.actualizarMatrizModelado();
 	}
-
-    cambiarRotacionAcumulada(x,y,z){
-        this.rotacionAcumulada[0]= x;
-        this.rotacionAcumulada[1]= y;
-        this.rotacionAcumulada[2]= z;
-    }
 
 }
 
@@ -198,31 +190,31 @@ class Cubo extends Objeto3D {
         this.mallaDeTriangulos = null;
 
         var caraSuperior = new Cuadrado(this.filas,this.columnas,this.lado,this.color);
-        caraSuperior.setTraslacion(0,this.lado/2,0.0);
+        caraSuperior.trasladar(0,this.lado/2,0.0);
         this.hijos.push(caraSuperior);
        
         var caraInferior = new Cuadrado(this.filas,this.columnas,this.lado,this.color);
-        caraInferior.setTraslacion(0,-this.lado/2,0.0);
+        caraInferior.trasladar(0,-this.lado/2,0.0);
         this.hijos.push(caraInferior);
 
         var caraIzquierda = new Cuadrado(this.filas,this.columnas,this.lado,this.color);
-        caraIzquierda.setRotacion(0,0,3.14/2.0);
-        caraIzquierda.setTraslacion(0,-this.lado/2,0);
+        caraIzquierda.rotar(0,0,3.14/2.0);
+        caraIzquierda.trasladar(0,-this.lado/2,0);
         this.hijos.push(caraIzquierda);
 
         var caraDerecha = new Cuadrado(this.filas,this.columnas,this.lado,this.color);
-        caraDerecha.setRotacion(0,0,3.14/2.0);
-        caraDerecha.setTraslacion(0,this.lado/2,0);
+        caraDerecha.rotar(0,0,3.14/2.0);
+        caraDerecha.trasladar(0,this.lado/2,0);
         this.hijos.push(caraDerecha);
 
         var caraFrente = new Cuadrado(this.filas,this.columnas,this.lado,this.color);
-        caraFrente.setRotacion(3.14/2.0,0,0);
-        caraFrente.setTraslacion(0,-this.lado/2,0);
+        caraFrente.rotar(3.14/2.0,0,0);
+        caraFrente.trasladar(0,-this.lado/2,0);
         this.hijos.push(caraFrente);
 
         var caraDetras = new Cuadrado(this.filas,this.columnas,this.lado,this.color);
-        caraDetras.setRotacion(3.14/2.0,0,0);
-        caraDetras.setTraslacion(0,this.lado/2,0);
+        caraDetras.rotar(3.14/2.0,0,0);
+        caraDetras.trasladar(0,this.lado/2,0);
         this.hijos.push(caraDetras);
     }
 
@@ -298,11 +290,11 @@ class Cilindro extends Objeto3D {
         this.mallaDeTriangulos = null;
 
         var circuloSuperior = new Circulo(this.filas,this.columnas,this.radio,this.color);
-        circuloSuperior.setTraslacion(0,this.alto/2,0);
+        circuloSuperior.trasladar(0,this.alto/2,0);
 
         var circuloInferior = new Circulo(this.filas,this.columnas,this.radio,this.color);
-        circuloInferior.setEscala(1,-1,1);
-        circuloInferior.setTraslacion(0,this.alto/2,0);
+        circuloInferior.escalar(1,-1,1);
+        circuloInferior.trasladar(0,this.alto/2,0);
 
         var cilindroSinTapa = new CilindroSinTapas(this.filas, this.columnas, this.radio, this.alto, this.color);
         cilindroSinTapa.agregarHijo(circuloSuperior);
@@ -331,16 +323,16 @@ class Ejes extends Objeto3D {
 
         this.mallaDeTriangulos = null;
         var ejeZ = new Cubo(10,20,1,vec4.fromValues(1.0,0.0,0.0,1.0)); 
-        ejeZ.setEscala(0.05,0.05,this.tamaño);
-        ejeZ.setTraslacion(0,0,this.tamaño/(2.0*this.tamaño));
+        ejeZ.escalar(0.05,0.05,this.tamaño);
+        ejeZ.trasladar(0,0,this.tamaño/(2.0*this.tamaño));
         this.hijos.push(ejeZ);
         var ejeX = new Cubo(10,20,1,vec4.fromValues(0.0,1.0,0.0,1.0)); 
-        ejeX.setEscala(this.tamaño,0.05,0.05);
-        ejeX.setTraslacion(this.tamaño/(2.0*this.tamaño),0,0);
+        ejeX.escalar(this.tamaño,0.05,0.05);
+        ejeX.trasladar(this.tamaño/(2.0*this.tamaño),0,0);
         this.hijos.push(ejeX);
         var ejeY = new Cubo(10,20,1,vec4.fromValues(0.0,0.0,1.0,1.0)); 
-        ejeY.setEscala(0.05,this.tamaño,0.05);
-        ejeY.setTraslacion(0,this.tamaño/(2.0*this.tamaño),0);
+        ejeY.escalar(0.05,this.tamaño,0.05);
+        ejeY.trasladar(0,this.tamaño/(2.0*this.tamaño),0);
         this.hijos.push(ejeY);
     }
 }
@@ -523,5 +515,34 @@ function setupBuffersSuperficie(superficie, filas, columnas){
         webgl_normal_buffer,
         webgl_uvs_buffer,
         webgl_index_buffer
+    }
+}
+
+class Losa extends Objeto3D {
+
+    constructor(figuraLosa,alturaLosa=0.2,color=RGB(100,100,100)) {
+
+        super(); 
+
+        this.color = color;
+        this.alturaLosa = alturaLosa;
+
+        this.superficieBarrido = null;
+
+        this.figuraLosa = figuraLosa;
+        this.initializeObject();
+    }
+
+    initializeObject() {
+
+        var barridoLosa = new SegmentoRectilineo();
+        barridoLosa.setPuntosDeControl([0,0,0], [0,this.alturaLosa,0]);
+
+        var difFiguraLosa = 0.01;
+        var difBarrido = 0.5;
+
+        this.superficieBarrido = new TileSurface(this.figuraLosa, barridoLosa, difFiguraLosa, difBarrido);
+
+        this.mallaDeTriangulos = this.superficieBarrido.setupBuffersBarrido();
     }
 }

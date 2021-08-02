@@ -16,18 +16,25 @@
     		</canvas>    		
     	</center>
 
+        <!--Bibliotecas externas-->
         <script src="js/gl-matrix.js"></script>
+        <script src="js/gl-matrix-min.js"></script>
+        <!--Utilidades-->
         <script src="modulo-geometria.js"></script>
-        <script src="Camera.js"></script>
-        <script src="droneCamera.js"></script>
+        <script src="superficiesBarrido.js"></script>
+        <script src="curvas.js"></script>
         <script src="utilsEscena.js"></script>
+        <!--Objetos de la Escena-->
         <script src="Grua.js"></script>
         <script src="gruaControl.js"></script>
-        <script src="cameraControl.js"></script>
+        <script src="Tobogan.js"></script>
+        <script src="toboganControl.js"></script>
+        <script src="Edificio.js"></script>
+        <script src="edificioControl.js"></script>
+        <!--Cámaras-->
+        <script src="camaraDrone.js"></script>
         <script src="camaraOrbital.js"></script>
-
-
-
+        <script src="camaraControl.js"></script>
         
         <script id="shader-vs" type="x-shader/x-vertex">
 
@@ -83,6 +90,7 @@
         
         <script>
 
+
             var vec3=glMatrix.vec3; // vector 3D
             var vec4=glMatrix.vec4; // vector 4D
             var mat3=glMatrix.mat3; // matriz 3x3
@@ -135,10 +143,16 @@
             
             // -------------
 
-            // objetos
+            // objetos de la escena
             var grua;
             var controladorGrua;
-            var objetos = [];
+            var tobogan;
+            var controladorTobogan;
+            var edificioConsigna;
+            var controladorEdificio;
+            var escena = [];
+            var curve;
+            var tile;
             //var escaladoSoga = 50;
 
             // agregar camaras acá
@@ -272,11 +286,13 @@
             function setupControles() {
 
                 controladorGrua = new ControlGrua();
+                controladorTobogan = new ControlTobogan();
+                controladorEdificio = new ControlEdificio();
             }
 
             function setupCamaras() {
 
-            camaraOrbital = new OrbitalCameraControl([0,0,0]);
+            camaraOrbital = new CamaraOrbital([0,0,0]);
             
             }
 
@@ -284,23 +300,32 @@
 
                 //Agrego los elementos a dibujarse al arreglo de objetos
 
-                var piso = new Cuadrado(MFil,MCol,100,RGB(255,255,190));
-                        objetos.push(piso);
-
+                var piso = new Cuadrado(MFil,MCol,160,RGB(120,150,120));
+                    escena.push(piso);
+                tobogan = new Tobogan();
+                    tobogan.agregarALaEscena(escena);
                 grua = new Grua();
-                grua.agregarEjes();
-                grua.agregarALaEscena(objetos);   
-
+                    grua.agregarALaEscena(escena); 
+                edificioConsigna = new Edificio();
+                    edificioConsigna.agregarALaEscena(escena);  
+                
+                /*Easter Eggs*/   
+                var palacioDeKnossos = new Edificio([-40,-40,0],4,3,5,20,2,20,RGB(200,180,150),RGB(20,20,20),RGB(150,0,0));
+                    palacioDeKnossos.agregarALaEscena(escena);
+                var panteon = new Edificio([40,-20,0],1,0,5,5,2,20,RGB(200,200,200),RGB(100,100,100),RGB(80,80,80));
+                    panteon.escalar(1,2,2);
+                    panteon.agregarALaEscena(escena);
+                var torreDeBabel = new Edificio([0,-60,0],10,10,5,5,2,10,RGB(200,180,150),RGB(150,100,60),RGB(100,60,30));   
+                    torreDeBabel.agregarALaEscena(escena);
                 
             }
 
-            function drawScene(){
+            function dibujarEscena(){
 
                 setupVertexShaderMatrix();
 
-                for (let index = 0; index < objetos.length; index++) 
-                    objetos[index].dibujar(mat4.create());                
-
+                for (let index = 0; index < escena.length; index++) 
+                    escena[index].dibujar(); 
             }
             
             function start(){                
@@ -313,7 +338,7 @@
                         viewMatrix=droneCam.getViewMatrix();
                         break;
                     case "orbital": 
-                        viewMatrix = camaraOrbital.getViewMatrix();
+                        viewMatrix = camaraOrbital.obtenerVistaOrbital();
                         break;    
                     default:
                         viewMatrix = droneCam.getViewMatrix();
@@ -322,9 +347,11 @@
 
                 requestAnimationFrame(start);
                 controladorGrua.update();
+                controladorTobogan.update();
+                controladorEdificio.update();
                 camaraOrbital.update();
                 droneCam.update();
-                drawScene();
+                dibujarEscena();
             }
             
             window.onload=initWebGL;

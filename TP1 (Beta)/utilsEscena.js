@@ -9,3 +9,15 @@ var MFil = 5;
 var MCol = 20;
 
 
+function getRandomDouble(min, max) {
+        
+    if(min > max) {
+        console.log("Error: min > max");
+        return;
+    }
+    
+    var range = max - min;
+    
+    return min + range * Math.random();
+}
+
