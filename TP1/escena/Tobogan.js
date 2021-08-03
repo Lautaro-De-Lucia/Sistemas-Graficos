@@ -61,10 +61,10 @@ class SeccionTobogan extends Objeto3D {
 
         var soporte1 = new Cilindro(this.ancho/4,2,RGB(100,60,30));
         soporte1.escalar(1,this.alturaSeccion,1);
-        soporte1.trasladar(this.ancho,1/2, 0);
+        soporte1.trasladar(this.ancho,1/this.alturaSeccion,0);
         var soporte2 = new Cilindro(this.ancho/4,2,RGB(100,60,30));
         soporte2.escalar(1,this.alturaSeccion,1);
-        soporte2.trasladar(-this.ancho,1/2, 0);
+        soporte2.trasladar(-this.ancho,1/this.alturaSeccion, 0);
 
         this.agregarHijo(soporte1);
         this.agregarHijo(soporte2);
