@@ -1,0 +1,585 @@
+<!doctype html>
+<html>
+    <head>
+        <title>TP1 Lautaro De Lucia</title>        
+        <style>
+            body{ background-color: rgb(255, 255, 255); }
+            canvas{ background-color: rgb(196, 228, 255); }
+			textarea{ background-color: black; color: white;}
+			h1 {
+  				color: rgb(54, 255, 47);
+                text-align: center;
+			}
+            h2 {
+                text-align: center;
+            }
+            h3 {
+                text-align: center;
+            }
+            h4 {
+                text-align:center;
+            }
+        </style>
+    </head>
+    <body>
+
+    	<center> 
+            <div id='canvas' style="position:-ms-page">
+                <canvas id="my-canvas" width="1300" height="800">
+                    Your browser does not support the HTML5 canvas element.
+                </canvas>   
+            </div>    
+            <right>   
+                <h1>
+                    Controles<br>
+                </h1>	
+                <h2>
+                    Camaras:<br>
+                </h2>
+                <h4>   
+                    Vista camara drone: 1<br>
+                    Vista camara cabina: 2<br>
+                    Vista orbital: 3<br>
+                </h4>              
+                <h3>
+                Control de la CamaraDrone:<br>
+                </h3>
+                <h4> 
+                    Vista:<br><br>
+                    Arriba: w<br>
+                    Abajo: s<br>
+                    Rotar Derecha: d<br>
+                    Rotar Izquierda: a<br><br>
+                    Movimiento:<br><br>
+                    Adelante: ArrowUp<br>
+                    Atras: ArrowDown<br>
+                    Derecha: ArrowRight<br>
+                    Izquierda: ArrowLeft<br>
+                </h4>
+                <h2>
+                    Objetos:<br>
+                </h2>  
+                <h3>
+                Control de la Grua:<br>
+                </h3> 
+                <h4>
+                    Subir cabina: W<br>
+                    Bajar cabina: S<br>
+                    Rotar cabina: A/D<br>
+                    Rotar brazo: Q/Z<br>
+                    Subir/Bajar plataforma: E/C<br>
+                </h4> 
+                <h3>   
+                Control del Edificio:<br>
+                </h3>
+                <h4>
+                    Pisos Inferiores: R/F<br>
+                    Pisos Superiores: T/G<br>
+                    Columnas: Y/H<br>
+                    Ventanas: V/B/N/M<br>
+                <h4>  
+                <h3> 
+                Control del Tobogan:<br>
+                </h3>
+                <h4>  
+                    Niveles: U/J<br>
+                <h4>
+                <audio controls playsinline autoplay loop> 
+                    <source src = "musiquita/01 - Brian Eno.mp3">
+                </audio> 	
+            </right> 
+        </center>
+
+        <!-- Bibliotecas externas -->
+        <script src="glmatrix/gl-matrix.js"></script>
+        <script src="glmatrix/gl-matrix-min.js"></script>
+        <!-- Utilidades -->
+        <script src="utilidades/moduloGeometria.js"></script>
+        <script src="utilidades/superficiesBarrido.js"></script>
+        <script src="utilidades/curvas.js"></script>
+        <script src="utilidades/utilsEscena.js"></script>
+        <!-- Objetos de la Escena -->
+        <script src="escena/Grua.js"></script>
+        <script src="escena/controladores/gruaControl.js"></script>
+        <script src="escena/Tobogan.js"></script>
+        <script src="escena/controladores/toboganControl.js"></script>
+        <script src="escena/Edificio.js"></script>
+        <script src="escena/controladores/edificioControl.js"></script>
+        <!-- Cámaras -->
+        <script src="camaras/camaraDrone.js"></script>
+        <script src="camaras/camaraOrbital.js"></script>
+        <script src="camaras/controladores/camaraControl.js"></script>
+        
+        <!-- Vertex Shaders -->
+        
+        <script id="uniformColor-vs" type="x-shader/x-vertex">
+
+            precision highp float;
+
+            uniform mat4 modelMatrix;            
+            uniform mat4 viewMatrix;
+            uniform mat4 projMatrix;
+            uniform mat4 normalMatrix;
+
+
+            attribute vec3 aVertexPosition;
+            attribute vec3 aVertexNormal;
+            attribute vec2 aVertexUv; //Atributo con las coordenadas [u,v] asociadas a la posicion y la normal
+
+            varying vec3 vPosWorld; 
+            varying vec3 vNormal;   
+            varying vec2 vUv; // variying -> Puedo acceder a esto en el fragment shader
+
+            varying vec3 iluminacion;
+            
+            void main(void) {
+
+                vPosWorld=(modelMatrix*vec4(aVertexPosition,1.0)).xyz; 
+                vNormal=(normalMatrix*vec4(aVertexNormal,1.0)).xyz; 
+                
+                gl_Position = projMatrix * viewMatrix * vec4(vPosWorld, 1.0);
+                
+                vUv = aVertexUv; 
+
+                vec3 luzAmbiente = vec3(0.8, 0.7, 0.6);
+                vec3 colorLuzDireccional = vec3(1.0, 1.0, 1.0);
+                vec3 direccionLuz = normalize(vec3(0.0, -0.5, -0.5));
+                float intensidadLuz = max(dot(vNormal.xyz, direccionLuz), 0.0);
+                iluminacion = luzAmbiente + (colorLuzDireccional * intensidadLuz);
+                
+            }
+
+        </script>
+
+        <script id="texture-vs" type="x-shader/x-vertex">
+
+            precision highp float;
+
+            uniform mat4 modelMatrix;            
+            uniform mat4 viewMatrix;
+            uniform mat4 projMatrix;
+            uniform mat4 normalMatrix;
+
+            attribute vec3 aVertexPosition;
+            attribute vec3 aVertexNormal;
+            attribute vec2 aVertexUv; //Atributo con las coordenadas [u,v] asociadas a la posicion y la normal
+
+            varying vec3 vPosWorld; 
+            varying vec3 vNormal;   
+            varying vec2 vUv; // variying -> Puedo acceder a esto en el fragment shader
+            
+            varying vec3 iluminacion;
+
+
+            void main(void) {
+
+                vPosWorld=(modelMatrix*vec4(aVertexPosition,1.0)).xyz; 
+                vNormal=(normalMatrix*vec4(aVertexNormal,1.0)).xyz; 
+                
+                gl_Position = projMatrix * viewMatrix * vec4(vPosWorld, 1.0);
+                
+                vUv = aVertexUv; //Pasamos las cordenadas UV al fragment shader
+
+                vec3 luzAmbiente = vec3(0.8, 0.7, 0.6);
+                vec3 colorLuzDireccional = vec3(1.0, 1.0, 1.0);
+                vec3 direccionLuz = normalize(vec3(0.0, -0.5, -0.5));
+                float intensidadLuz = max(dot(vNormal.xyz, direccionLuz), 0.0);
+                iluminacion = luzAmbiente + (colorLuzDireccional * intensidadLuz);
+
+            }
+
+        </script>
+
+        <!-- Fragment Shader -->
+        <script id="uniformColor-fs" type="x-shader/x-fragment">
+            
+            precision highp float;
+
+            uniform vec4 color;
+            
+            varying vec3 vPosWorld;
+            varying vec3 vNormal;
+            varying vec2 vUv; //Lo que se pasa desde el vertex shader
+
+            uniform sampler2D uSampler; // uTexture
+
+            varying vec3 iluminacion;
+
+            void main(void) {
+
+                vec4 pixel = vec4(color);
+                gl_FragColor = vec4(pixel.rgb * iluminacion, 1.0);
+
+            }
+
+        </script>
+
+        <script id="texture-fs" type="x-shader/x-fragment">
+            
+            precision highp float;
+
+            uniform vec4 color;
+            
+            varying vec3 vPosWorld;
+            varying vec3 vNormal;
+            varying vec2 vUv; //Lo que se pasa desde el vertex shader
+
+            uniform sampler2D uSampler; // uTexture
+
+            varying vec3 iluminacion;
+
+            void main(void) {
+
+                vec4 texel = texture2D(uSampler, vUv);
+                gl_FragColor = vec4(texel.rgb * iluminacion, 1.0);
+
+            }
+
+        </script>
+
+
+
+        <!-- WebGL -->
+        
+        <script>
+
+            // Elementos de glmatrix
+            var vec2=glMatrix.vec2;
+            var vec3=glMatrix.vec3; 
+            var vec4=glMatrix.vec4; 
+            var mat3=glMatrix.mat3; 
+            var mat4=glMatrix.mat4; 
+
+            // Atributos webGL
+            var gl = null;
+            var canvas = null;
+            var glProgramUniformColor = null;
+            var glProgramTextures = null;
+
+            // Shaders
+            var vertexShaderUniformColor = null;
+            var fragmentShaderUniformColor = null;
+            var vertexShaderTextures = null;
+            var fragmentShaderTextures = null;
+
+            // Elementos de vista en GLSL
+            var modelMatrixUniform = null;
+            var viewMatrixUniform = null;
+            var projMatrixUniform = null;
+            var normalMatrixUniform = null;
+
+            var modelMatrixTextures = null;
+            var viewMatrixTextures = null;
+            var projMatrixTextures = null;
+            var normalMatrixTextures = null;
+
+            var vertexPositionAttribute = null;
+            var vertexNormalAttribute = null;
+
+            var colorUniform = null;
+
+            var uSamplerUniform = null;
+
+            var trianglesVerticeBuffer = null;
+            var trianglesNormalBuffer = null;
+            // var trianglesUvBuffer = null;
+            var trianglesIndexBuffer = null;
+            
+            var initialModelMatrix = mat4.create();
+            var initialColor = vec4.fromValues(1.0,1.0,1.0,1.0);
+            var initialNormalMatrix = mat4.create();
+
+            var viewMatrix = mat4.create();
+            var projMatrix = mat4.create();
+
+            // ------------
+            
+            var vPosWorld = null;
+            var vNormal = null;
+            
+            // -------------
+
+            // elementos de la escena
+            var piso;
+            var grua;
+            var controladorGrua;
+            var tobogan;
+            var controladorTobogan;
+            var edificio;
+            var controladorEdificio;
+            var escena = [];
+            var curve;
+            var tile;
+
+            // Camaras
+
+            var camera = null;
+            var droneCam = null;
+            var camaraActual = null;
+            var camaraOrbital = null;
+
+            //Hashmaps para texturas
+            var texturas = new Map();
+            var URLsTexturas = new Map();
+            URLsTexturas.set("cielo","texturas/cielo.jpg");
+            URLsTexturas.set("concreto","texturas/ConcreteWall01_2K_BaseColor_resultado.jpg");
+            URLsTexturas.set("pasto","texturas/Grass01_2K_BaseColor_resultado.jpg");
+            URLsTexturas.set("musgo","texturas/Moss01_2K_BaseColor_resultado.jpg");
+            URLsTexturas.set("pinturaOxidada","texturas/pinturaOxidada.jpg");
+            URLsTexturas.set("grava","texturas/SandyGravel02_2K_BaseColor_resultado.jpg");
+            URLsTexturas.set("baldosas","texturas/StoneTilesFloor01_2K_BaseColor_resultado.jpg");
+            URLsTexturas.set("madera","texturas/WoodenPlanks05_4K_BaseColor_resultado.jpg");
+            URLsTexturas.set("aceroNegro","texturas/black_iron.jpg");
+            URLsTexturas.set("aceroGris","texturas/gray-iron.jpg");
+            URLsTexturas.set("aceroAmarillo","texturas/yellow_iron.jpg");
+            URLsTexturas.set("aluminio","texturas/tin.jpg");
+            URLsTexturas.set("vidrio","texturas/glass-window.jpg");
+
+
+
+            
+            // Inicialización de WebGLd
+            function initWebGL(){
+
+                canvas = document.getElementById("my-canvas");  
+                
+                try{gl = canvas.getContext("webgl");}
+                catch(e){alert("Error: Your browser does not appear to support WebGL.");}
+
+                if(gl) {
+
+                    setupWebGL();
+                    initShaders();
+                    setupVertexShaderMatrix();
+                    setupFragmentShaderMatrix();
+                    setupCamaras();
+                    setupControles();
+                    setupSectorPruebas();
+                    setupEscena();                    
+                    start();   
+
+                }else{    
+                    alert("Error: Your browser does not appear to support WebGL.");
+                }
+            }
+
+            function setupWebGL(){
+                
+                gl.enable(gl.DEPTH_TEST);
+                                
+                gl.clearColor(0.1, 0.1, 0.2, 1.0);
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);     
+    
+                gl.viewport(0, 0, canvas.width, canvas.height);
+
+            }
+            //REFACTOR: Mucho código duplicado, ver si puedo refactorizar esto
+            function initShaders() {
+                
+                //Obtenemos referencias a los elementos HTML donde estan definidos los shaders
+                var fs_uniformColor = document.getElementById('uniformColor-fs').innerHTML;
+                var vs_uniformColor = document.getElementById('uniformColor-vs').innerHTML;
+                var fs_textures = document.getElementById('texture-fs').innerHTML;
+                var vs_textures = document.getElementById('texture-vs').innerHTML;
+
+                //Creamos los shaders y los atamos a una variable de JS
+                vertexShaderUniformColor = makeShader(vs_uniformColor, gl.VERTEX_SHADER);
+                fragmentShaderUniformColor = makeShader(fs_uniformColor, gl.FRAGMENT_SHADER);
+                vertexShaderTextures = makeShader(vs_textures, gl.VERTEX_SHADER);
+                fragmentShaderTextures = makeShader(fs_textures, gl.FRAGMENT_SHADER);
+                //Creamos un programa WebGL
+                glProgramUniformColor = gl.createProgram();
+                glProgramTextures = gl.createProgram();
+                //Le atamos los fs y vs correspondientes y linkeamos el programa               
+                gl.attachShader(glProgramUniformColor, vertexShaderUniformColor);
+                gl.attachShader(glProgramUniformColor, fragmentShaderUniformColor);
+                gl.linkProgram(glProgramUniformColor);
+                gl.attachShader(glProgramTextures, vertexShaderTextures);
+                gl.attachShader(glProgramTextures, fragmentShaderTextures);
+                gl.linkProgram(glProgramTextures);
+
+                if (!gl.getProgramParameter(glProgramUniformColor, gl.LINK_STATUS)) {
+                    alert("Unable to initialize the shader program.");
+                }
+                if (!gl.getProgramParameter(glProgramUniformColor, gl.LINK_STATUS)) {
+                    alert("Unable to initialize the shader program.");
+                }
+                
+                gl.useProgram(glProgramUniformColor);
+            }
+            
+            function makeShader(src, type){
+                                
+                var shader = gl.createShader(type);
+                gl.shaderSource(shader, src);
+                gl.compileShader(shader);
+
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                    
+                    console.log("Error compiling shader: " + gl.getShaderInfoLog(shader));
+                }
+                
+                return shader;
+            }
+            
+            function setupVertexShaderMatrix(){
+                
+                modelMatrixUniform = gl.getUniformLocation(glProgramUniformColor, "modelMatrix");
+                viewMatrixUniform  = gl.getUniformLocation(glProgramUniformColor, "viewMatrix");
+                projMatrixUniform  = gl.getUniformLocation(glProgramUniformColor, "projMatrix");
+                normalMatrixUniform  = gl.getUniformLocation(glProgramUniformColor, "normalMatrix");
+                
+                gl.uniformMatrix4fv(modelMatrixUniform, false, initialModelMatrix);
+                gl.uniformMatrix4fv(viewMatrixUniform, false, viewMatrix);
+                gl.uniformMatrix4fv(projMatrixUniform, false, projMatrix);
+                gl.uniformMatrix4fv(normalMatrixUniform, false, initialNormalMatrix);
+
+                gl.useProgram(glProgramTextures);
+
+                modelMatrixTextures = gl.getUniformLocation(glProgramTextures, "modelMatrix");
+                viewMatrixTextures  = gl.getUniformLocation(glProgramTextures, "viewMatrix");
+                projMatrixTextures  = gl.getUniformLocation(glProgramTextures, "projMatrix");
+                normalMatrixTextures  = gl.getUniformLocation(glProgramTextures, "normalMatrix");
+                
+                gl.uniformMatrix4fv(modelMatrixTextures, false, initialModelMatrix);
+                gl.uniformMatrix4fv(viewMatrixTextures, false, viewMatrix);
+                gl.uniformMatrix4fv(projMatrixTextures, false, projMatrix);
+                gl.uniformMatrix4fv(normalMatrixTextures, false, initialNormalMatrix);
+
+                gl.useProgram(glProgramUniformColor);
+            
+            }
+            
+            function setupFragmentShaderMatrix(){
+                colorUniform  = gl.getUniformLocation(glProgramUniformColor, "color");
+                gl.uniform4fv(colorUniform, initialColor);
+                //Llamamos al sampler desde el fragment shader
+                gl.useProgram(glProgramTextures);
+                uSamplerUniform = gl.getUniformLocation(glProgramTextures, 'uSampler');
+                gl.uniform1i(uSamplerUniform, null);
+                gl.useProgram(glProgramUniformColor);
+            }
+
+            //Obs: Camara Drone provista por la cátedra
+            function setupDroneCamera() {
+                droneCam = new DroneCameraControl([0,0,10]);
+                
+                mat4.perspective(projMatrix,45, canvas.width / canvas.height, 0.1, 100.0);
+                
+                mat4.identity(initialModelMatrix);
+                mat4.rotate(initialModelMatrix,initialModelMatrix, -1.57078, [1.0, 0.0, 0.0]);
+
+                mat4.identity(viewMatrix);
+                mat4.translate(viewMatrix,viewMatrix, [0.0, 0.0, -15.0]);
+            }
+
+            function setupControles() {
+
+                controladorGrua = new ControlGrua();
+                controladorTobogan = new ControlTobogan();
+                controladorEdificio = new ControlEdificio();
+
+            }
+
+            function setupCamaras() {
+                
+                setupDroneCamera(); 
+                camaraOrbital = new CamaraOrbital([0,0,0]);
+            
+            }
+
+            function setupSectorPruebas(){
+                
+                /*
+                //Cuadrados
+                testCuadradoConTextura = new Cuadrado(2,RGB(120,150,120),new Textura(URLsTexturas.get("concreto")));
+                    escena.push(testCuadradoConTextura);
+                testCuadradoSinTextura = new Cuadrado(2,RGB(120,150,120));
+                    testCuadradoSinTextura.trasladar(0,5,0);
+                    //testSinTextura.setTextura(new Textura(URLsTexturas.get("pasto1")));
+                    escena.push(testCuadradoSinTextura); 
+
+                //Cubos
+                testCuboSinTextura = new Cubo(2,RGB(250,0,0));
+                    testCuboSinTextura.trasladar(5,0,0);
+                    escena.push(testCuboSinTextura);
+                testCuboConTextura = new Cubo(2,RGB(250,0,0),new Textura(URLsTexturas.get("baldosas")));
+                    testCuboConTextura.trasladar(5,5,0);
+                    escena.push(testCuboConTextura);    
+
+                //Circulos
+                testCirculoSinTextura = new Circulo(1,RGB(0,250,0));
+                    testCirculoSinTextura.trasladar(-10,0,0);
+                    escena.push(testCirculoSinTextura);
+                testCirculoConTextura = new Circulo(1,RGB(0,250,0),new Textura(URLsTexturas.get("concreto")));
+                    testCirculoConTextura.trasladar(-10,5,0);
+                    escena.push(testCirculoConTextura);
+
+                //Cilindros
+                testCirculoSinTextura = new Cilindro(1,1,RGB(0,250,0));
+                    testCirculoSinTextura.trasladar(-5,0,0);
+                    escena.push(testCirculoSinTextura);
+                testCirculoConTextura = new Cilindro(1,1,RGB(0,250,0),new Textura(URLsTexturas.get("concreto")));
+                    testCirculoConTextura.trasladar(-5,5,0);
+                    escena.push(testCirculoConTextura);
+                */
+                
+
+                //Cilindros    
+            }
+
+            function setupEscena() {
+                
+                piso = new Cuadrado(150,RGB(120,150,120),new Textura(URLsTexturas.get("pasto"),[20,20]));
+                    escena.push(piso);
+                grua = new Grua();
+                    grua.agregarALaEscena(escena); 
+                tobogan = new Tobogan();
+                    tobogan.agregarALaEscena(escena);
+                edificio = new Edificio();
+                    edificio.agregarALaEscena(escena); 
+              
+                
+            }
+            
+            function start(){                
+                
+                switch(camaraActual){
+                    case "cabina":
+                        viewMatrix=grua.obtenerVistaCabina();
+                        break;
+                    case "drone":
+                        viewMatrix=droneCam.getViewMatrix();
+                        break;
+                    case "orbital": 
+                        viewMatrix = camaraOrbital.obtenerVistaOrbital();
+                        break;    
+                    default:
+                        viewMatrix = droneCam.getViewMatrix();
+                        break;    
+                }
+
+                requestAnimationFrame(start);
+                updateControlers();
+                setupVertexShaderMatrix();
+                dibujarEscena();
+            }
+
+            function updateControlers(){
+                controladorGrua.update();
+                controladorTobogan.update();
+                controladorEdificio.update();
+                camaraOrbital.update();
+                droneCam.update();
+            }
+
+            function dibujarEscena(){
+                for (let index = 0; index < escena.length; index++) 
+                    escena[index].dibujar(); 
+            }
+            
+            window.onload=initWebGL;
+
+        </script>
+    </body>
+</html>
