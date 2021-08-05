@@ -283,6 +283,14 @@ class Piso extends Objeto3D {
                 rotarX = true;
             
             ventana.rotar(rotarX*Math.PI/2, 0, rotarZ*Math.PI/2);
+
+            //Tambien invierto la normal según en que posicion estoy
+            if(posicionVentana[0] == (this.tamañoVentana * this.ventanasAncho / 2)) 
+                ventana.escalar(1,-1,1);
+            else if(posicionVentana[2] == -(this.tamañoVentana * this.ventanasLargo / 2)) 
+                ventana.escalar(1,-1,1);
+            
+
             ventanas.agregarHijo(ventana);
         }
     //Agregamos las ventanas
@@ -365,6 +373,54 @@ class SuperficieLosa extends SuperficieBarrido {
         super(forma, barrido, dF, dB);
     }
 
+    agregarVerticesTapaInferior() {
+
+        var verticesPorNivel = this.perimetro.posiciones.length;
+
+        var centroInferior = this.barrido.getPosicion(0);
+        var normalInferior = this.barrido.getTangente(0);
+        vec3.scale(normalInferior, normalInferior, -1); 
+        console.log(normalInferior);
+        var uv = vec2.fromValues(0,0);
+
+        var matrizDeNivel = this.obtenerMatrizDeNivel(0);
+
+        for (let j = 0; j < verticesPorNivel; j++) {
+
+            var posicion3D = vec3.clone(this.perimetro.posiciones[j]);
+            
+            var uv = vec2.fromValues(this.perimetro.posiciones[j][0]/5,this.perimetro.posiciones[j][2]/5);
+
+            var posicion4D = vec4.fromValues(posicion3D[0], posicion3D[1], posicion3D[2], 1);
+
+            vec4.transformMat4(posicion4D, posicion4D, matrizDeNivel);
+
+            posicion3D = [posicion4D[0], posicion4D[1], posicion4D[2]];
+            
+            this.bufferPosicion.push(posicion3D[0]);
+            this.bufferPosicion.push(posicion3D[1]);
+            this.bufferPosicion.push(posicion3D[2]);
+            this.bufferNormal.push(normalInferior[0]);
+            this.bufferNormal.push(normalInferior[1]);
+            this.bufferNormal.push(normalInferior[2]);
+            this.bufferUV.push(uv[0]);
+            this.bufferUV.push(uv[1]);
+        }
+
+        this.bufferPosicion.push(centroInferior[0]);
+        this.bufferPosicion.push(centroInferior[1]);
+        this.bufferPosicion.push(centroInferior[2]);
+
+        this.bufferNormal.push(normalInferior[0]);
+        this.bufferNormal.push(normalInferior[1]);
+        this.bufferNormal.push(normalInferior[2]);
+
+        this.bufferUV.push(uv[0]);
+        this.bufferUV.push(uv[1]);
+
+    }
+
+
     agregarVerticesSuperficie() {
 
         var verticesPorNivel = this.perimetro.posiciones.length;
@@ -389,6 +445,7 @@ class SuperficieLosa extends SuperficieBarrido {
                 posicion3D = [posicion4D[0], posicion4D[1], posicion4D[2]];
                 normal3D = [normal4D[0], normal4D[1], normal4D[2]];
 
+                vec3.scale(normal3D,normal3D,-1);
                 vec3.normalize(normal3D,normal3D);
                 
                 this.bufferPosicion.push(posicion3D[0]);
@@ -401,52 +458,6 @@ class SuperficieLosa extends SuperficieBarrido {
                 this.bufferUV.push(uv[1]);
             }
         }
-    }
-
-    agregarVerticesTapaInferior() {
-
-        var verticesPorNivel = this.perimetro.posiciones.length;
-
-        var centroInferior = this.barrido.getPosicion(0);
-        var normalInferior = this.barrido.getTangente(0);
-        vec3.scale(normalInferior, normalInferior, -1); 
-        var uv = vec2.fromValues(0,0);
-
-        this.bufferPosicion.push(centroInferior[0]);
-        this.bufferPosicion.push(centroInferior[1]);
-        this.bufferPosicion.push(centroInferior[2]);
-
-        this.bufferNormal.push(normalInferior[0]);
-        this.bufferNormal.push(normalInferior[1]);
-        this.bufferNormal.push(normalInferior[2]);
-
-        this.bufferUV.push(uv[0]);
-        this.bufferUV.push(uv[1]);
-
-        var matrizDeNivel = this.obtenerMatrizDeNivel(0);
-
-        for (let j = 0; j < verticesPorNivel; j++) {
-
-            var posicion3D = vec3.clone(this.perimetro.posiciones[j]);
-            
-            var uv = vec2.fromValues(this.perimetro.posiciones[j][0]/5,this.perimetro.posiciones[j][2]/5);
-
-            var posicion3D = vec4.fromValues(posicion3D[0], posicion3D[1], posicion3D[2], 1);
-
-            vec4.transformMat4(posicion3D, posicion3D, matrizDeNivel);
-
-            posicion3D = [posicion3D[0], posicion3D[1], posicion3D[2]];
-            
-            this.bufferPosicion.push(posicion3D[0]);
-            this.bufferPosicion.push(posicion3D[1]);
-            this.bufferPosicion.push(posicion3D[2]);
-            this.bufferNormal.push(normalInferior[0]);
-            this.bufferNormal.push(normalInferior[1]);
-            this.bufferNormal.push(normalInferior[2]);
-            this.bufferUV.push(uv[0]);
-            this.bufferUV.push(uv[1]);
-        }
-
     }
 
     agregarVerticesTapaSuperior() {

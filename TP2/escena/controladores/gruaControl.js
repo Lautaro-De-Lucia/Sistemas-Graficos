@@ -59,7 +59,7 @@ function ControlGrua() {
         deltaRHB = 0;
         grua.rotacionAntiHorariaBrazo(deltaRAB*3);
         deltaRAB = 0;
-        
+        easterEgg.rotar(0.1,0,0);        
     }
 
 

@@ -136,6 +136,10 @@ class SuperficieTobogan extends SuperficieBarrido {
         for (let i = 0; i < this.niveles; i++) {
 
             var matrizDeNivel = this.obtenerMatrizDeNivel(i);
+            var matrizDeNivelNormal = mat4.clone(matrizDeNivel);
+
+            mat4.invert(matrizDeNivelNormal, matrizDeNivelNormal);
+            mat4.transpose(matrizDeNivelNormal, matrizDeNivelNormal);
             
             for (let j = 0; j < verticesPorNivel; j++) {
 
@@ -146,10 +150,13 @@ class SuperficieTobogan extends SuperficieBarrido {
                 var normal4D = vec4.fromValues(normal3D[0], normal3D[1], normal3D[2], 1.0);
 
                 vec4.transformMat4(posicion4D, posicion4D, matrizDeNivel);
-                vec4.transformMat4(normal4D, normal4D, matrizDeNivel);
+                vec4.transformMat4(normal4D, normal4D, matrizDeNivelNormal);
 
                 posicion3D = vec3.fromValues(posicion4D[0], posicion4D[1], posicion4D[2]);
                 normal3D = vec3.fromValues(normal4D[0], normal4D[1], normal4D[2]);
+
+                vec3.scale(normal3D, normal3D, -1);
+                vec3.normalize(normal3D,normal3D);
                 
                 this.bufferPosicion.push(posicion3D[0]);
                 this.bufferPosicion.push(posicion3D[1]);

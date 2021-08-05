@@ -143,7 +143,7 @@
 
                 vec3 luzAmbiente = vec3(0.8, 0.7, 0.6);
                 vec3 colorLuzDireccional = vec3(1.0, 1.0, 1.0);
-                vec3 direccionLuz = normalize(vec3(0.0, -0.5, -0.5));
+                vec3 direccionLuz = normalize(vec3(-2.0, 1.0, 0.0));
                 float intensidadLuz = max(dot(vNormal.xyz, direccionLuz), 0.0);
                 iluminacion = luzAmbiente + (colorLuzDireccional * intensidadLuz);
                 
@@ -182,7 +182,7 @@
 
                 vec3 luzAmbiente = vec3(0.8, 0.7, 0.6);
                 vec3 colorLuzDireccional = vec3(1.0, 1.0, 1.0);
-                vec3 direccionLuz = normalize(vec3(0.0, -0.5, -0.5));
+                vec3 direccionLuz = normalize(vec3(-2.0, 1.0, 0.0));
                 float intensidadLuz = max(dot(vNormal.xyz, direccionLuz), 0.0);
                 iluminacion = luzAmbiente + (colorLuzDireccional * intensidadLuz);
 
@@ -310,6 +310,7 @@
             var escena = [];
             var curve;
             var tile;
+            var easterEgg;
 
             // Camaras
 
@@ -332,6 +333,7 @@
             URLsTexturas.set("aceroNegro","texturas/black_iron.jpg");
             URLsTexturas.set("aceroGris","texturas/gray-iron.jpg");
             URLsTexturas.set("aceroAmarillo","texturas/yellow_iron.jpg");
+            URLsTexturas.set("esponja","texturas/WaterSponge01_2K_BaseColor_resultado.jpg");
             URLsTexturas.set("aluminio","texturas/tin.jpg");
             URLsTexturas.set("vidrio","texturas/glass-window.jpg");
 
@@ -490,42 +492,7 @@
 
             function setupSectorPruebas(){
                 
-                /*
-                //Cuadrados
-                testCuadradoConTextura = new Cuadrado(2,RGB(120,150,120),new Textura(URLsTexturas.get("concreto")));
-                    escena.push(testCuadradoConTextura);
-                testCuadradoSinTextura = new Cuadrado(2,RGB(120,150,120));
-                    testCuadradoSinTextura.trasladar(0,5,0);
-                    //testSinTextura.setTextura(new Textura(URLsTexturas.get("pasto1")));
-                    escena.push(testCuadradoSinTextura); 
 
-                //Cubos
-                testCuboSinTextura = new Cubo(2,RGB(250,0,0));
-                    testCuboSinTextura.trasladar(5,0,0);
-                    escena.push(testCuboSinTextura);
-                testCuboConTextura = new Cubo(2,RGB(250,0,0),new Textura(URLsTexturas.get("baldosas")));
-                    testCuboConTextura.trasladar(5,5,0);
-                    escena.push(testCuboConTextura);    
-
-                //Circulos
-                testCirculoSinTextura = new Circulo(1,RGB(0,250,0));
-                    testCirculoSinTextura.trasladar(-10,0,0);
-                    escena.push(testCirculoSinTextura);
-                testCirculoConTextura = new Circulo(1,RGB(0,250,0),new Textura(URLsTexturas.get("concreto")));
-                    testCirculoConTextura.trasladar(-10,5,0);
-                    escena.push(testCirculoConTextura);
-
-                //Cilindros
-                testCirculoSinTextura = new Cilindro(1,1,RGB(0,250,0));
-                    testCirculoSinTextura.trasladar(-5,0,0);
-                    escena.push(testCirculoSinTextura);
-                testCirculoConTextura = new Cilindro(1,1,RGB(0,250,0),new Textura(URLsTexturas.get("concreto")));
-                    testCirculoConTextura.trasladar(-5,5,0);
-                    escena.push(testCirculoConTextura);
-                */
-                
-
-                //Cilindros    
             }
 
             function setupEscena() {

@@ -225,12 +225,14 @@ class Cubo extends Objeto3D {
         this.hijos.push(caraSuperior);
        
         var caraInferior = new Cuadrado(this.lado,this.color,this.textura);
-        caraInferior.trasladar(0,-this.lado/2,0.0);
+        caraInferior.escalar(1,-1,1);
+        caraInferior.trasladar(0,this.lado/2,0.0);
         this.hijos.push(caraInferior);
 
         var caraIzquierda = new Cuadrado(this.lado,this.color,this.textura);
         caraIzquierda.rotar(0,0,3.14/2.0);
         caraIzquierda.trasladar(0,-this.lado/2,0);
+        caraIzquierda.escalar(1,-1,1);
         this.hijos.push(caraIzquierda);
 
         var caraDerecha = new Cuadrado(this.lado,this.color,this.textura);
@@ -241,6 +243,7 @@ class Cubo extends Objeto3D {
         var caraFrente = new Cuadrado(this.lado,this.color,this.textura);
         caraFrente.rotar(3.14/2.0,0,0);
         caraFrente.trasladar(0,-this.lado/2,0);
+        caraFrente.escalar(1,-1,1);
         this.hijos.push(caraFrente);
 
         var caraDetras = new Cuadrado(this.lado,this.color,this.textura);
@@ -399,15 +402,6 @@ class CilindroSinTapasSuperficie {
         this.radio = radio;
         this.alto = alto;
     }
-
-    productoVectorial(v1, v2){
- 
-        var x = v1[1] * v2[2] - v1[2] * v2[1];
-        var y = v1[2] * v2[0] - v1[0] * v2[2];
-        var z = v1[0] * v2[1] - v1[1] * v2[0];
-
-        return [x, y, z];
-    }
     
     getPosicion(u,v){
 
@@ -415,21 +409,17 @@ class CilindroSinTapasSuperficie {
         var x = Math.sin(2*u*Math.PI) * this.radio;
         var y = (v-0.5) * this.alto;
         
-        return [x,y,z];
+        return vec3.fromValues(x,y,z);
     }
 
     getNormal(u,v){
-
-        var du = 0.0001;
-        var dv = 0.0001;
-        var v1 = this.getPosicion(u + du, v);
-        var v2 = this.getPosicion(u, v + dv);
-
-        return this.productoVectorial(v1, v2);
+        var posicion = this.getPosicion(u,v);
+        posicion[1]= 0;
+        vec3.normalize(posicion,posicion);
+        return posicion;
     }
 
     getCoordenadasTextura(u,v){
-        
         return [u,v];
     }
 }

@@ -133,8 +133,12 @@ class Grua {
         var soportePoleaDerecha = new Cubo(0.2,RGB(100,60,30),new Textura(URLsTexturas.get("madera")));
             soportePoleaDerecha.trasladar(-0.3,1,0);
             soportePoleaDerecha.escalar(1,5,2);
-             D.agregarHijo(soportePoleaDerecha);   
+             D.agregarHijo(soportePoleaDerecha);  
+        easterEgg = new Cuadrado(0.8,RGB(0,0,0),new Textura(URLsTexturas.get("esponja")));
+            easterEgg.rotar(0,0,-3.14/2);
+            D.agregarHijo(easterEgg);
         D.escalar(2,2,2);
+    
         return D;
     }
     generarPiezaE(){
@@ -152,7 +156,7 @@ class Grua {
             F.agregarHijo(viga);
         var contrapeso = new Cubo(2,RGB(150,150,150));
             contrapeso.trasladar(0,0,-8);
-            contrapeso.escalar(2,1,1);
+            contrapeso.escalar(2,1,-1);
             F.agregarHijo(contrapeso);
         var poleaIzquierdaViga = new Circulo(0.2,RGB(180,180,180),new Textura(URLsTexturas.get("aluminio")));
             poleaIzquierdaViga.trasladar(0.41,0,16.5);
