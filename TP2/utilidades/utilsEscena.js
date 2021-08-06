@@ -1,4 +1,4 @@
-var NFil = 10;
+var NFil = 5;
 var NCol = 10;
 
 function RGB (R,G,B) {
@@ -14,6 +14,148 @@ function isPowerOf2(value) {
     return (value & (value - 1)) == 0;
 }
 
+class ShaderHandler{ 
+    
+    constructor(vertexShaderID,fragmentShaderID,WebGLContext){
+
+        this.gl = WebGLContext;
+
+        this.modelMatrix;
+        this.viewMatrix;
+        this.projMatrix;
+        this.normalMatrix;
+        
+        this.fragmentShader = this.makeShader(document.getElementById(fragmentShaderID).innerHTML,this.gl.FRAGMENT_SHADER);
+        this.vertexShader = this.makeShader(document.getElementById(vertexShaderID).innerHTML,this.gl.VERTEX_SHADER);
+        
+        this.glProgram = this.gl.createProgram();
+
+        this.initialize();
+    }
+
+    makeShader(src, type){
+                
+        var shader = this.gl.createShader(type);
+        this.gl.shaderSource(shader, src);
+        this.gl.compileShader(shader);
+    
+        if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
+            console.log("Error compiling shader: " + this.gl.getShaderInfoLog(shader));
+        }
+        
+        return shader;
+    }
+
+    initialize(){
+        this.gl.attachShader(this.glProgram, this.vertexShader);
+        this.gl.attachShader(this.glProgram, this.fragmentShader);
+        this.gl.linkProgram(this.glProgram);
+        if (!this.gl.getProgramParameter(this.glProgram, this.gl.LINK_STATUS)) {
+            alert("Unable to initialize the shader program.");
+        }
+        this.gl.useProgram(this.glProgram);
+    }
+
+    setupVertexShaderMatrix(){}
+
+    setupFragmentShaderMatrix(){}
+
+    getProgram(){
+        return this.glProgram;
+    }
+
+}
+
+class UniformColorShaderHandler extends ShaderHandler{
+    
+    constructor(vertexShaderID,fragmentShaderID,WebGLContext){
+        super(vertexShaderID,fragmentShaderID,WebGLContext);
+        this.color;
+    }
+    
+    setupVertexShaderMatrix(){
+        
+        this.gl.useProgram(this.glProgram);
+        
+        this.modelMatrix = this.gl.getUniformLocation(this.glProgram, "modelMatrix");
+        this.viewMatrix  = this.gl.getUniformLocation(this.glProgram, "viewMatrix");
+        this.projMatrix  = this.gl.getUniformLocation(this.glProgram, "projMatrix");
+        this.normalMatrix  = this.gl.getUniformLocation(this.glProgram, "normalMatrix");
+        
+        this.gl.uniformMatrix4fv(this.modelMatrix, false, initialModelMatrix);
+        this.gl.uniformMatrix4fv(this.viewMatrix, false, viewMatrix);
+        this.gl.uniformMatrix4fv(this.projMatrix, false, projMatrix);
+        this.gl.uniformMatrix4fv(this.normalMatrix, false, initialNormalMatrix);
+    }
+
+    setupFragmentShaderMatrix(){
+        this.gl.useProgram(this.glProgram);
+        this.color = gl.getUniformLocation(this.glProgram, "color");
+        this.gl.uniform4fv(this.color, initialColor);
+    }
+
+    setShaderMatrix(mModelado,color){
+            
+            var normalMatrix = glMatrix.mat4.clone(mModelado);
+            mat4.invert(normalMatrix,normalMatrix);
+            mat4.transpose(normalMatrix,normalMatrix);
+        
+            this.gl.useProgram(this.glProgram)
+            this.gl.uniformMatrix4fv(this.modelMatrix, false, mModelado);
+            this.gl.uniformMatrix4fv(this.normalMatrix, false, normalMatrix);
+            this.gl.uniform4fv(this.color, color);
+        
+    }
+
+}
+
+class TextureShaderHandler extends ShaderHandler{
+    
+    constructor(vertexShaderID,fragmentShaderID,WebGLContext){
+        super(vertexShaderID,fragmentShaderID,WebGLContext);
+        this.color;
+        this.uSamplerUniform;
+    }
+    
+    setupVertexShaderMatrix(){
+        
+        this.gl.useProgram(this.glProgram);
+        
+        this.modelMatrix = this.gl.getUniformLocation(this.glProgram, "modelMatrix");
+        this.viewMatrix  = this.gl.getUniformLocation(this.glProgram, "viewMatrix");
+        this.projMatrix  = this.gl.getUniformLocation(this.glProgram, "projMatrix");
+        this.normalMatrix  = this.gl.getUniformLocation(this.glProgram, "normalMatrix");
+        
+        this.gl.uniformMatrix4fv(this.modelMatrix, false, initialModelMatrix);
+        this.gl.uniformMatrix4fv(this.viewMatrix, false, viewMatrix);
+        this.gl.uniformMatrix4fv(this.projMatrix, false, projMatrix);
+        this.gl.uniformMatrix4fv(this.normalMatrix, false, initialNormalMatrix);
+    }
+
+    setupFragmentShaderMatrix(){
+        this.gl.useProgram(this.glProgram);
+        this.uSamplerUniform = gl.getUniformLocation(this.glProgram, 'uSampler');
+        this.gl.uniform1i(this.uSamplerUniform, null);
+    }
+
+    setShaderMatrix(mModelado,textura){
+            
+        this.gl.useProgram(this.glProgram);
+    
+        var normalMatrix = glMatrix.mat4.clone(mModelado);
+        mat4.invert(normalMatrix,normalMatrix);
+        mat4.transpose(normalMatrix,normalMatrix);
+    
+        this.gl.uniformMatrix4fv(this.modelMatrix, false, mModelado);
+        this.gl.uniformMatrix4fv(this.normalMatrix, false, normalMatrix);
+        this.gl.activeTexture(gl.TEXTURE0);
+        this.gl.bindTexture(gl.TEXTURE_2D, textura.getTexturaWebGL());
+        this.gl.uniform1i(this.uSamplerUniform, 0); 
+        
+    }
+
+}
+
 class Textura {
     constructor(url,escala = vec2.fromValues(1,1)){
         this.url = url;
@@ -23,9 +165,7 @@ class Textura {
 
     getEscala(){return this.escala;};
     getTexturaWebGL(){return this.texturaWebGL;};
-    esNula(){
-        return false;
-    }
+    estaCargada(){return true;}
 
     cargarTextura(url) {
     
@@ -75,7 +215,7 @@ class TexturaVacia {
     getEscala(){
         return vec2.fromValues(1,1);
     }
-    esNula(){
-        return true;
+    estaCargada(){
+        return false;
     }
 }

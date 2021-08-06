@@ -262,23 +262,13 @@
             var vertexShaderTextures = null;
             var fragmentShaderTextures = null;
 
-            // Elementos de vista en GLSL
-            var modelMatrixUniform = null;
-            var viewMatrixUniform = null;
-            var projMatrixUniform = null;
-            var normalMatrixUniform = null;
+            var shadersColorUniforme;
+            var shadersTexturas;
 
-            var modelMatrixTextures = null;
-            var viewMatrixTextures = null;
-            var projMatrixTextures = null;
-            var normalMatrixTextures = null;
+            // Elementos de vista en GLSL
 
             var vertexPositionAttribute = null;
             var vertexNormalAttribute = null;
-
-            var colorUniform = null;
-
-            var uSamplerUniform = null;
 
             var trianglesVerticeBuffer = null;
             var trianglesNormalBuffer = null;
@@ -311,6 +301,7 @@
             var curve;
             var tile;
             var easterEgg;
+            var easterEgg2;
 
             // Camaras
 
@@ -335,6 +326,7 @@
             URLsTexturas.set("aceroAmarillo","texturas/yellow_iron.jpg");
             URLsTexturas.set("esponja","texturas/WaterSponge01_2K_BaseColor_resultado.jpg");
             URLsTexturas.set("aluminio","texturas/tin.jpg");
+            URLsTexturas.set("astronauta","texturas/AmericanHero01_2K_BaseColor_resultado.jpg");
             URLsTexturas.set("vidrio","texturas/glass-window.jpg");
 
 
@@ -345,7 +337,9 @@
 
                 canvas = document.getElementById("my-canvas");  
                 
-                try{gl = canvas.getContext("webgl");}
+                try{
+                    gl = canvas.getContext("webgl");
+                }
                 catch(e){alert("Error: Your browser does not appear to support WebGL.");}
 
                 if(gl) {
@@ -366,103 +360,28 @@
             }
 
             function setupWebGL(){
-                
-                gl.enable(gl.DEPTH_TEST);
-                                
+                gl.enable(gl.DEPTH_TEST);                                
                 gl.clearColor(0.1, 0.1, 0.2, 1.0);
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);     
-    
                 gl.viewport(0, 0, canvas.width, canvas.height);
-
             }
-            //REFACTOR: Mucho código duplicado, ver si puedo refactorizar esto
+
             function initShaders() {
-                
-                //Obtenemos referencias a los elementos HTML donde estan definidos los shaders
-                var fs_uniformColor = document.getElementById('uniformColor-fs').innerHTML;
-                var vs_uniformColor = document.getElementById('uniformColor-vs').innerHTML;
-                var fs_textures = document.getElementById('texture-fs').innerHTML;
-                var vs_textures = document.getElementById('texture-vs').innerHTML;
+                shadersColorUniforme = new UniformColorShaderHandler('uniformColor-vs','uniformColor-fs',gl);
+                shadersTexturas = new TextureShaderHandler('texture-vs','texture-fs',gl);                
+            } 
 
-                //Creamos los shaders y los atamos a una variable de JS
-                vertexShaderUniformColor = makeShader(vs_uniformColor, gl.VERTEX_SHADER);
-                fragmentShaderUniformColor = makeShader(fs_uniformColor, gl.FRAGMENT_SHADER);
-                vertexShaderTextures = makeShader(vs_textures, gl.VERTEX_SHADER);
-                fragmentShaderTextures = makeShader(fs_textures, gl.FRAGMENT_SHADER);
-                //Creamos un programa WebGL
-                glProgramUniformColor = gl.createProgram();
-                glProgramTextures = gl.createProgram();
-                //Le atamos los fs y vs correspondientes y linkeamos el programa               
-                gl.attachShader(glProgramUniformColor, vertexShaderUniformColor);
-                gl.attachShader(glProgramUniformColor, fragmentShaderUniformColor);
-                gl.linkProgram(glProgramUniformColor);
-                gl.attachShader(glProgramTextures, vertexShaderTextures);
-                gl.attachShader(glProgramTextures, fragmentShaderTextures);
-                gl.linkProgram(glProgramTextures);
-
-                if (!gl.getProgramParameter(glProgramUniformColor, gl.LINK_STATUS)) {
-                    alert("Unable to initialize the shader program.");
-                }
-                if (!gl.getProgramParameter(glProgramUniformColor, gl.LINK_STATUS)) {
-                    alert("Unable to initialize the shader program.");
-                }
-                
-                gl.useProgram(glProgramUniformColor);
-            }
-            
-            function makeShader(src, type){
-                                
-                var shader = gl.createShader(type);
-                gl.shaderSource(shader, src);
-                gl.compileShader(shader);
-
-                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-                    
-                    console.log("Error compiling shader: " + gl.getShaderInfoLog(shader));
-                }
-                
-                return shader;
-            }
-            
             function setupVertexShaderMatrix(){
-                
-                modelMatrixUniform = gl.getUniformLocation(glProgramUniformColor, "modelMatrix");
-                viewMatrixUniform  = gl.getUniformLocation(glProgramUniformColor, "viewMatrix");
-                projMatrixUniform  = gl.getUniformLocation(glProgramUniformColor, "projMatrix");
-                normalMatrixUniform  = gl.getUniformLocation(glProgramUniformColor, "normalMatrix");
-                
-                gl.uniformMatrix4fv(modelMatrixUniform, false, initialModelMatrix);
-                gl.uniformMatrix4fv(viewMatrixUniform, false, viewMatrix);
-                gl.uniformMatrix4fv(projMatrixUniform, false, projMatrix);
-                gl.uniformMatrix4fv(normalMatrixUniform, false, initialNormalMatrix);
-
-                gl.useProgram(glProgramTextures);
-
-                modelMatrixTextures = gl.getUniformLocation(glProgramTextures, "modelMatrix");
-                viewMatrixTextures  = gl.getUniformLocation(glProgramTextures, "viewMatrix");
-                projMatrixTextures  = gl.getUniformLocation(glProgramTextures, "projMatrix");
-                normalMatrixTextures  = gl.getUniformLocation(glProgramTextures, "normalMatrix");
-                
-                gl.uniformMatrix4fv(modelMatrixTextures, false, initialModelMatrix);
-                gl.uniformMatrix4fv(viewMatrixTextures, false, viewMatrix);
-                gl.uniformMatrix4fv(projMatrixTextures, false, projMatrix);
-                gl.uniformMatrix4fv(normalMatrixTextures, false, initialNormalMatrix);
-
-                gl.useProgram(glProgramUniformColor);
-            
+                shadersColorUniforme.setupVertexShaderMatrix();                
+                shadersTexturas.setupVertexShaderMatrix();
             }
-            
+
             function setupFragmentShaderMatrix(){
-                colorUniform  = gl.getUniformLocation(glProgramUniformColor, "color");
-                gl.uniform4fv(colorUniform, initialColor);
-                //Llamamos al sampler desde el fragment shader
-                gl.useProgram(glProgramTextures);
-                uSamplerUniform = gl.getUniformLocation(glProgramTextures, 'uSampler');
-                gl.uniform1i(uSamplerUniform, null);
-                gl.useProgram(glProgramUniformColor);
+                shadersColorUniforme.setupFragmentShaderMatrix();
+                shadersTexturas.setupFragmentShaderMatrix();
             }
 
-            //Obs: Camara Drone provista por la cátedra
+            //Obs: Camara Drone provista por la cátedramColor-fs',gl);
             function setupDroneCamera() {
                 droneCam = new DroneCameraControl([0,0,10]);
                 
@@ -504,8 +423,7 @@
                 tobogan = new Tobogan();
                     tobogan.agregarALaEscena(escena);
                 edificio = new Edificio();
-                    edificio.agregarALaEscena(escena); 
-              
+                    edificio.agregarALaEscena(escena);        
                 
             }
             

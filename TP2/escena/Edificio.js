@@ -46,6 +46,11 @@ class Edificio {
             nuevoPiso.trasladar(this.posicion[0],this.posicion[1],this.posicion[2]);
             this.edificio.agregarHijo(nuevoPiso);
         }
+
+        easterEgg2 = new Cubo(0.8,this.colorBase,new Textura(URLsTexturas.get("astronauta")));
+        easterEgg2.trasladar(this.posicion[0],this.posicion[1]+this.alturaBase+(this.tamañoVentana+this.tamañoVentana/5)*(this.numPisosT1+this.numPisosT2)+3*this.tamañoVentana/4,this.posicion[2]);
+        this.edificio.agregarHijo(easterEgg2);
+
     }
 
 
@@ -56,6 +61,7 @@ class Edificio {
         //quitamos el ascensor y la base
         this.edificio.quitarHijo();    
         this.edificio.quitarHijo();
+        this.edificio.quitarHijo(); //Y el easter egg :/
     }
 
     generarPuntosDeControl(){
@@ -68,7 +74,6 @@ class Edificio {
     setVentanasALoAncho(ventanasAncho){
         if(this.ventanasAncho==ventanasAncho)
             return;
-        console.log('ancho');
         this.limpiarEdificio();
         this.ventanasAncho =ventanasAncho;
         this.generarPuntosDeControl();
@@ -78,7 +83,6 @@ class Edificio {
     setVentanasALoLargo(ventanasLargo){
         if(this.ventanasLargo==ventanasLargo)
             return;
-        console.log('largo');
         this.limpiarEdificio();
         this.ventanasLargo =ventanasLargo;
         this.generarPuntosDeControl();
@@ -380,7 +384,6 @@ class SuperficieLosa extends SuperficieBarrido {
         var centroInferior = this.barrido.getPosicion(0);
         var normalInferior = this.barrido.getTangente(0);
         vec3.scale(normalInferior, normalInferior, -1); 
-        console.log(normalInferior);
         var uv = vec2.fromValues(0,0);
 
         var matrizDeNivel = this.obtenerMatrizDeNivel(0);

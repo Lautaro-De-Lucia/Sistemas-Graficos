@@ -60,6 +60,7 @@ function ControlEdificio() {
         edificio.setCantidadDeColumnas(cantidadColumnas);
         edificio.setVentanasALoAncho(ventanasAncho);
         edificio.setVentanasALoLargo(ventanasLargo);
+        easterEgg2.rotar(0.05,-0.05,0.05);
     }
 
 

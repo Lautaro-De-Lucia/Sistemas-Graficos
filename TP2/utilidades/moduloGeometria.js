@@ -51,16 +51,14 @@ class Objeto3D {
         var m = mat4.create();
 
 		mat4.multiply(m, matPadre, this.matrizModelado); 
+        
         if (this.mallaDeTriangulos){
-            if(this.textura.esNula()){
-                gl.useProgram(glProgramUniformColor);
-                setShaderMatrixUniforme(m,this.color);
-                dibujarMallaDeTriangulos(this.mallaDeTriangulos,glProgramUniformColor);
+            if(this.textura.estaCargada()){
+                shadersTexturas.setShaderMatrix(m,this.textura);
+                dibujarMallaDeTriangulos(this.mallaDeTriangulos,shadersTexturas.getProgram()); 
             } else{
-                gl.useProgram(glProgramTextures);
-                setShaderMatrixTextura(m,this.textura);
-                dibujarMallaDeTriangulos(this.mallaDeTriangulos,glProgramTextures); 
-                gl.useProgram(glProgramUniformColor);
+                shadersColorUniforme.setShaderMatrix(m,this.color);
+                dibujarMallaDeTriangulos(this.mallaDeTriangulos,shadersColorUniforme.getProgram());
             }
 		}
 		for (var i = 0; i < this.hijos.length; i++){
@@ -148,32 +146,6 @@ function dibujarMallaDeTriangulos(mallaDeTriangulos,programa){
     }
 
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
-}
-
-function setShaderMatrixUniforme(mModelado, color){
-    
-    var normalMatrix = glMatrix.mat4.clone(mModelado);
-	mat4.invert(normalMatrix,normalMatrix);
-	mat4.transpose(normalMatrix,normalMatrix);
-
-        gl.useProgram(glProgramUniformColor)
-        gl.uniformMatrix4fv(modelMatrixUniform, false, mModelado);
-        gl.uniformMatrix4fv(normalMatrixUniform, false, normalMatrix);
-        gl.uniform4fv(colorUniform, color);
-    
-}
-
-function setShaderMatrixTextura(mModelado,textura){
-    
-    var normalMatrix = glMatrix.mat4.clone(mModelado);
-	mat4.invert(normalMatrix,normalMatrix);
-	mat4.transpose(normalMatrix,normalMatrix);
-
-    gl.uniformMatrix4fv(modelMatrixTextures, false, mModelado);
-    gl.uniformMatrix4fv(normalMatrixTextures, false, normalMatrix);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, textura.getTexturaWebGL());
-    gl.uniform1i(uSamplerUniform, 0); 
 }
 
 class Cuadrado extends Objeto3D {
