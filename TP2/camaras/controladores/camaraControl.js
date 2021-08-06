@@ -16,6 +16,12 @@ document.addEventListener("keypress",function(camaras){
 
             camaraActual = "orbital";
             break;    
+
+        case "4": // activar/desactivar mapa de reflexion
+
+            reflexion = reflexion? false : true;
+            edificio.reset();
+            break;        
         
         default:
 

@@ -161,6 +161,7 @@ class Grua {
         var poleaIzquierdaViga = new Circulo(0.2,RGB(180,180,180),new Textura(URLsTexturas.get("aluminio")));
             poleaIzquierdaViga.trasladar(0.41,0,16.5);
             poleaIzquierdaViga.rotar(0,0,3.14/2);
+            poleaIzquierdaViga.escalar(1,-1,1);
             F.agregarHijo(poleaIzquierdaViga);        
          var poleaDerechaViga = new Circulo(0.2,RGB(180,180,180),new Textura(URLsTexturas.get("aluminio")));
             poleaDerechaViga.trasladar(-0.41,0,16.5);
@@ -175,7 +176,6 @@ class Grua {
             return G;
     }
     generarPiezaH(){
-        //Soga y Plataforma
         var H = new Objeto3D();
             H.trasladar(0,16.5,14.5);
 
@@ -448,8 +448,9 @@ class Grua {
        
         return mat4.lookAt(out,from,to,up)
 
-    }
-//COMENTARIO: NO ES NECESARIO QUE HAYA ROTACION HORARIA Y ANTIHORARIA
-//SOLO ROTARCABINA, Y LE MANDO PARAMETRO POSITIVO Y O NEGATIVO EN EL EVENTHANDLER
-//Refactorizar esto si hay tiempo antes de la entrega        
+    }   
+    obtenerPosicionCabina(){
+    	var cabina = this.piezas[3];
+	    return vec3.fromValues(cabina.posicionAcumulada[0],cabina.posicionAcumulada[1]+1.5,cabina.posicionAcumulada[2]);
+    }   
 }

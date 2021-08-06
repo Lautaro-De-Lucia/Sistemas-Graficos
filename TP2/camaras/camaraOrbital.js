@@ -55,4 +55,8 @@ class CamaraOrbital{
         mat4.lookAt(this.matrizVista, this.posicionOjo, this.foco, this.arriba);
         return this.matrizVista;
     }
+
+    obtenerPosicionOjo(){
+        return this.posicionOjo;
+    }
 }

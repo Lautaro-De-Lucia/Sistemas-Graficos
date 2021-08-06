@@ -64,6 +64,11 @@ class Edificio {
         this.edificio.quitarHijo(); //Y el easter egg :/
     }
 
+    reset(){
+        this.limpiarEdificio();
+        this.generarEdificio();
+    }
+
     generarPuntosDeControl(){
         this.puntosDeControlVentanasT1 = this.obtenerPuntosDeControlVentanas(this.ventanasAncho,this.ventanasLargo,this.tamañoVentana);
         this.puntosDeControlLosaT1 = this.obtenerPuntosDeControlLosa(this.ventanasAncho,this.ventanasLargo,this.tamañoVentana);
@@ -271,7 +276,14 @@ class Piso extends Objeto3D {
             vec3.add(posicionVentana, posicionVentana, vec3.fromValues(0,this.tamañoVentana/2+this.alturaLosa,0));
 
             //Generamos la Ventana
-            var ventana = new Cuadrado(this.tamañoVentana,this.colorVentana,new Textura(URLsTexturas.get("vidrio")));
+            var ventana = new Cuadrado(this.tamañoVentana,this.colorVentana);
+
+            if(reflexion == true){
+                ventana.activarReflexion();
+            }
+            else{
+                ventana.cargarTextura(new Textura(URLsTexturas.get("vidrio")));
+            }
 
             //La colocamos en posición
             ventana.trasladar(posicionVentana[0], posicionVentana[1], posicionVentana[2]);
@@ -288,12 +300,32 @@ class Piso extends Objeto3D {
             
             ventana.rotar(rotarX*Math.PI/2, 0, rotarZ*Math.PI/2);
 
-            //Tambien invierto la normal según en que posicion estoy
-            if(posicionVentana[0] == (this.tamañoVentana * this.ventanasAncho / 2)) 
-                ventana.escalar(1,-1,1);
-            else if(posicionVentana[2] == -(this.tamañoVentana * this.ventanasLargo / 2)) 
-                ventana.escalar(1,-1,1);
+            //Tambien coloco las normales asi como los marcos según en qué posicion estoy respecto al centro
+
+            var marcoVentana = new Cilindro(0.01,this.tamañoVentana,RGB(0,0,0));
             
+            if(posicionVentana[0] == (this.tamañoVentana * this.ventanasAncho / 2)){
+                ventana.escalar(1,-1,1);
+                marcoVentana.rotar(0,0,3.14/2);
+                marcoVentana.trasladar(0,0,this.tamañoVentana/2);
+                ventana.agregarHijo(marcoVentana); 
+            }
+            if(posicionVentana[0] == -(this.tamañoVentana * this.ventanasAncho / 2)){
+                marcoVentana.rotar(0,0,3.14/2);
+                marcoVentana.trasladar(0,0,this.tamañoVentana/2);
+                ventana.agregarHijo(marcoVentana); 
+            }
+            if(posicionVentana[2] == (this.tamañoVentana * this.ventanasLargo / 2)){ 
+                marcoVentana.rotar(3.14/2,0,0);
+                marcoVentana.trasladar(this.tamañoVentana/2,0,0);
+                ventana.agregarHijo(marcoVentana); 
+            }
+            if(posicionVentana[2] == -(this.tamañoVentana * this.ventanasLargo / 2)){ 
+                ventana.escalar(1,-1,1);
+                marcoVentana.rotar(3.14/2,0,0);
+                marcoVentana.trasladar(this.tamañoVentana/2,0,0);
+                ventana.agregarHijo(marcoVentana); 
+            }
 
             ventanas.agregarHijo(ventana);
         }

@@ -14,6 +14,11 @@ class Curva {
 
 }
 
+//DISCLAIMER: 
+	/*Por simplicidad, el segmento rectilineo debería tener la dirección de
+	alguno de los ejes cartesianos. La superficie resultante del barrido luego
+	puede rotarse aplicando transformaciones sobre sus vértices*/
+
 class SegmentoRectilineo extends Curva {
 
 	constructor() {
@@ -61,7 +66,7 @@ class SegmentoRectilineo extends Curva {
 
 		return punto; 
 	}
-
+	
 	getTangente(u) {
 		if (this.director[1] == 0 && this.director[2] == 0)
 			return vec3.fromValues(1,0,0);
@@ -104,46 +109,19 @@ class BezierCuadratica extends Curva {
 		this.puntosDeControl.push(p2);
 	}
 
-	getNumPuntosDeControl() {
+	getNumPuntosDeControl() {return (this.puntosDeControl).length;}
 
-		return (this.puntosDeControl).length;
-	}
+	B0(u) {return (1-u)*(1-u);}
+	B1(u) {return 2*(1-u)*u;}
+	B2(u) {return u*u;}
 
-	B0(u) {
-		return (1-u)*(1-u);
-	}
+	dB0(u) {return -2*(1-u);}
+	dB1(u) {return 2*(1-2*u);}
+	dB2(u) {return 2*u;}
 
-	B1(u) {
-		return 2*(1-u)*u;
-	}
-
-	B2(u) {
-		return u*u;
-	}
-
-	dB0(u) {
-		return -2*(1-u);
-	}
-
-	dB1(u) {
-		return 2*(1-2*u);
-	}
-
-	dB2(u) {
-		return 2*u;
-	}
-
-	ddB0(u) {
-		return 2;
-	}
-
-	ddB1(u) {
-		return -4;
-	}
-
-	ddB2(u) {
-		return 2;		
-	}
+	ddB0(u) {return 2;}
+	ddB1(u) {return -4;}
+	ddB2(u) {return 2;		}
 
 	getPosicion(u) {
 
@@ -391,9 +369,7 @@ class BezierCubica extends Curva {
 	getBinormal(u) {
 
 		var vectortangentee = this.getTangente(u);
-
 		var vectorBinormal = vec3.create();
-
 		var segundaDerivada = this.getSegundaDerivada(u);
 
 		vec3.cross(vectorBinormal, segundaDerivada, vectortangentee);
@@ -489,7 +465,6 @@ class BSplineCuadratica extends Curva {
 
 		var vectortangentee = this.getTangente(u);
 		var vectorBinormal = this.getBinormal(u);
-
 		var vectorNormal = vec3.create();
 
 		vec3.cross(vectorNormal, vectortangentee, vectorBinormal);
@@ -527,9 +502,7 @@ class BSplineCuadratica extends Curva {
 	getBinormal(u) {
 		
 		var vectortangentee = this.getTangente(u);
-
 		var vectorBinormal = vec3.fromValues(u);
-
 		var segundaDerivada = this.getSegundaDerivada(u);
 
 		vec3.cross(vectorBinormal, segundaDerivada, vectortangentee);
@@ -565,7 +538,7 @@ class multiplesBezierCuadratica extends Curva {
 		var t = u*this.curvas.length; 
 		var numCurvas = (t-(t%1));
 
-        //OPTIMIZAR --> Ver si hay una forma más elegante de solucionarlo
+        //REFACTOR: Ver si hay una forma más elegante de solucionarlo
 		if(numCurvas == this.curvas.length) {
 			numCurvas = this.curvas.length-1;
 			t = this.curvas.length-0.0000001;
@@ -639,7 +612,7 @@ class multiplesBSpineCuadratica extends Curva{
 		var t = u*this.curvas.length; 
 		var numCurvas = (t-(t%1));
 
-        //OPTIMIZAR --> Ver si hay una forma más elegante de solucionarlo
+        //REFACTOR: Ver si hay una forma más elegante de solucionarlo
 		if(numCurvas == this.curvas.length) {
 			numCurvas = this.curvas.length-1;
 			t = this.curvas.length-0.0000001;

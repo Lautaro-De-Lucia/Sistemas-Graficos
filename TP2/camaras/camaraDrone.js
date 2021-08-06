@@ -161,6 +161,10 @@
 
         }
 
+        this.getPosition = function(){
+            return position;
+        }
+
 
 
     }

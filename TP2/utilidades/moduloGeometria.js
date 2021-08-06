@@ -15,13 +15,23 @@ class Objeto3D {
         this.posicionAcumulada = vec3.fromValues(0,0,0); 
         this.rotacionAcumulada = vec3.fromValues(0,0,0); 
         this.escalaAcumulada = vec3.fromValues(1,1,1); 
+
+        this.reflexion = false;
         
         this.hijos = [];
 
     }
 
-    setTextura(textura){
+    cargarTextura(textura){
         this.textura = textura;
+    }
+
+    activarReflexion(){
+        this.reflexion = true;
+    }
+
+    esReflexivo(){
+        return this.reflexion;
     }
 
     getMallaDeTriangulos() {
@@ -51,11 +61,14 @@ class Objeto3D {
         var m = mat4.create();
 
 		mat4.multiply(m, matPadre, this.matrizModelado); 
-        
+
         if (this.mallaDeTriangulos){
             if(this.textura.estaCargada()){
                 shadersTexturas.setShaderMatrix(m,this.textura);
                 dibujarMallaDeTriangulos(this.mallaDeTriangulos,shadersTexturas.getProgram()); 
+            } if(this.esReflexivo()){
+                shadersReflexion.setShaderMatrix(m);
+                dibujarMallaDeTriangulos(this.mallaDeTriangulos,shadersReflexion.getProgram());
             } else{
                 shadersColorUniforme.setShaderMatrix(m,this.color);
                 dibujarMallaDeTriangulos(this.mallaDeTriangulos,shadersColorUniforme.getProgram());
@@ -151,12 +164,14 @@ function dibujarMallaDeTriangulos(mallaDeTriangulos,programa){
 class Cuadrado extends Objeto3D {
 
     constructor(lado = 1, color = RGB(250,250,0),textura = new TexturaVacia()) {
-
+        
         super();
 
         this.color = color;
         this.superficieElemental = new CuadradoSuperficie(lado);
         this.textura = textura;
+        this.filas = 2;
+        this.columnas = 2;
 
         this.setupFigura();
 
@@ -239,6 +254,8 @@ class Circulo extends Objeto3D {
         this.radio = radio;
         this.color = color;
         this.textura = textura;
+        this.filas = 5;
+        this.columnas = 5;
 
         this.superficieElemental = new CirculoSuperficie(radio);
 
@@ -261,6 +278,8 @@ class CilindroSinTapas extends Objeto3D {
         this.alto = alto;
         this.color = color;
         this.textura = textura;
+        this.filas = 1;
+        this.columnas = 5;
 
         this.superficieElemental = new CilindroSinTapasSuperficie(radio, alto);
 

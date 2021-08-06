@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
     <head>
-        <title>TP1 Lautaro De Lucia</title>        
+        <title>TP2 Lautaro De Lucia</title>        
         <style>
             body{ background-color: rgb(255, 255, 255); }
             canvas{ background-color: rgb(196, 228, 255); }
@@ -40,6 +40,7 @@
                     Vista camara drone: 1<br>
                     Vista camara cabina: 2<br>
                     Vista orbital: 3<br>
+                    Activar/Desactivar Mapa de Reflexion: 4<br>
                 </h4>              
                 <h3>
                 Control de la CamaraDrone:<br>
@@ -121,14 +122,13 @@
             uniform mat4 projMatrix;
             uniform mat4 normalMatrix;
 
-
             attribute vec3 aVertexPosition;
             attribute vec3 aVertexNormal;
-            attribute vec2 aVertexUv; //Atributo con las coordenadas [u,v] asociadas a la posicion y la normal
+            attribute vec2 aVertexUv;
 
             varying vec3 vPosWorld; 
             varying vec3 vNormal;   
-            varying vec2 vUv; // variying -> Puedo acceder a esto en el fragment shader
+            varying vec2 vUv; 
 
             varying vec3 iluminacion;
             
@@ -151,6 +151,29 @@
 
         </script>
 
+        <script id="uniformColor-fs" type="x-shader/x-fragment">
+            
+            precision highp float;
+
+            uniform vec4 color;
+            
+            varying vec3 vPosWorld;
+            varying vec3 vNormal;
+            varying vec2 vUv; 
+
+            uniform sampler2D uSampler; 
+
+            varying vec3 iluminacion;
+
+            void main(void) {
+
+                vec4 pixel = vec4(color);
+                gl_FragColor = vec4(pixel.rgb * iluminacion, 1.0);
+
+            }
+
+        </script>
+
         <script id="texture-vs" type="x-shader/x-vertex">
 
             precision highp float;
@@ -162,11 +185,11 @@
 
             attribute vec3 aVertexPosition;
             attribute vec3 aVertexNormal;
-            attribute vec2 aVertexUv; //Atributo con las coordenadas [u,v] asociadas a la posicion y la normal
+            attribute vec2 aVertexUv;
 
             varying vec3 vPosWorld; 
             varying vec3 vNormal;   
-            varying vec2 vUv; // variying -> Puedo acceder a esto en el fragment shader
+            varying vec2 vUv; 
             
             varying vec3 iluminacion;
 
@@ -178,37 +201,13 @@
                 
                 gl_Position = projMatrix * viewMatrix * vec4(vPosWorld, 1.0);
                 
-                vUv = aVertexUv; //Pasamos las cordenadas UV al fragment shader
+                vUv = aVertexUv; 
 
                 vec3 luzAmbiente = vec3(0.8, 0.7, 0.6);
                 vec3 colorLuzDireccional = vec3(1.0, 1.0, 1.0);
                 vec3 direccionLuz = normalize(vec3(-2.0, 1.0, 0.0));
                 float intensidadLuz = max(dot(vNormal.xyz, direccionLuz), 0.0);
                 iluminacion = luzAmbiente + (colorLuzDireccional * intensidadLuz);
-
-            }
-
-        </script>
-
-        <!-- Fragment Shader -->
-        <script id="uniformColor-fs" type="x-shader/x-fragment">
-            
-            precision highp float;
-
-            uniform vec4 color;
-            
-            varying vec3 vPosWorld;
-            varying vec3 vNormal;
-            varying vec2 vUv; //Lo que se pasa desde el vertex shader
-
-            uniform sampler2D uSampler; // uTexture
-
-            varying vec3 iluminacion;
-
-            void main(void) {
-
-                vec4 pixel = vec4(color);
-                gl_FragColor = vec4(pixel.rgb * iluminacion, 1.0);
 
             }
 
@@ -222,9 +221,9 @@
             
             varying vec3 vPosWorld;
             varying vec3 vNormal;
-            varying vec2 vUv; //Lo que se pasa desde el vertex shader
+            varying vec2 vUv; 
 
-            uniform sampler2D uSampler; // uTexture
+            uniform sampler2D uSampler; 
 
             varying vec3 iluminacion;
 
@@ -238,6 +237,70 @@
         </script>
 
 
+        <script id="reflection-vs" type="x-shader/x-vertex">
+
+            precision highp float;
+
+            attribute vec3 aVertexPosition;
+            attribute vec3 aVertexNormal;
+            attribute vec2 aVertexUv; // aTextureCoordinate
+
+            uniform mat4 modelMatrix;            
+            uniform mat4 viewMatrix;
+            uniform mat4 projMatrix;
+            uniform mat4 normalMatrix;
+
+            varying vec3 vPosWorld; 
+            varying vec3 vNormal;
+            varying vec2 vUv;
+
+            varying vec3 iluminacion;
+            
+            void main(void) {
+
+                vPosWorld=(modelMatrix*vec4(aVertexPosition,1.0)).xyz; 
+                vNormal=(normalMatrix*vec4(aVertexNormal,1.0)).xyz;
+                
+                gl_Position = projMatrix * viewMatrix * vec4(vPosWorld, 1.0);
+
+                vUv = aVertexUv; 
+
+                vec3 luzAmbiente = vec3(0.8, 0.7, 0.6);
+                vec3 colorLuzDireccional = vec3(1.0, 1.0, 1.0);
+                vec3 direccionLuz = normalize(vec3(-2.0, 1.0, 0.0));
+                float intensidadLuz = max(dot(vNormal.xyz, direccionLuz), 0.0);
+                iluminacion = luzAmbiente + (colorLuzDireccional * intensidadLuz);
+            }
+
+        </script>
+
+
+        <script id="reflection-fs" type="x-shader/x-fragment">
+            
+            precision highp float;
+
+            uniform samplerCube uSamplerCube;
+            uniform vec3 worldCameraPosition;
+            
+            varying vec3 vPosWorld;
+            varying vec3 vNormal;
+            varying vec2 vUv; 
+
+            varying vec3 iluminacion;
+            
+            void main(void) {
+
+                vec4 pixelColor;
+
+                vec3 worldNormal = normalize(vNormal);
+                vec3 eyeToSurfaceDir = normalize(vPosWorld - worldCameraPosition);
+                vec3 direction = reflect(eyeToSurfaceDir,worldNormal);
+                pixelColor = textureCube(uSamplerCube, direction);
+
+                gl_FragColor = vec4(pixelColor.rgb * iluminacion, 1.0);
+            }
+
+        </script>
 
         <!-- WebGL -->
         
@@ -253,41 +316,22 @@
             // Atributos webGL
             var gl = null;
             var canvas = null;
-            var glProgramUniformColor = null;
-            var glProgramTextures = null;
 
             // Shaders
-            var vertexShaderUniformColor = null;
-            var fragmentShaderUniformColor = null;
-            var vertexShaderTextures = null;
-            var fragmentShaderTextures = null;
-
             var shadersColorUniforme;
             var shadersTexturas;
 
             // Elementos de vista en GLSL
-
             var vertexPositionAttribute = null;
             var vertexNormalAttribute = null;
-
-            var trianglesVerticeBuffer = null;
-            var trianglesNormalBuffer = null;
-            // var trianglesUvBuffer = null;
-            var trianglesIndexBuffer = null;
+            var textureCoordAttribute = null;
             
+            // atributos Iniciales
             var initialModelMatrix = mat4.create();
             var initialColor = vec4.fromValues(1.0,1.0,1.0,1.0);
             var initialNormalMatrix = mat4.create();
-
             var viewMatrix = mat4.create();
             var projMatrix = mat4.create();
-
-            // ------------
-            
-            var vPosWorld = null;
-            var vNormal = null;
-            
-            // -------------
 
             // elementos de la escena
             var piso;
@@ -297,20 +341,17 @@
             var controladorTobogan;
             var edificio;
             var controladorEdificio;
-            var escena = [];
-            var curve;
-            var tile;
             var easterEgg;
             var easterEgg2;
+            var escena = [];
 
             // Camaras
-
-            var camera = null;
             var droneCam = null;
             var camaraActual = null;
             var camaraOrbital = null;
+            var reflexion = false;
 
-            //Hashmaps para texturas
+            //Hashmaps para manejeo de texturas (REFACTOR: estas cadenas deberían levantarse de un archivo)
             var texturas = new Map();
             var URLsTexturas = new Map();
             URLsTexturas.set("cielo","texturas/cielo.jpg");
@@ -329,9 +370,15 @@
             URLsTexturas.set("astronauta","texturas/AmericanHero01_2K_BaseColor_resultado.jpg");
             URLsTexturas.set("vidrio","texturas/glass-window.jpg");
 
+            var texturasMapaCubico = new Map();
+            texturasMapaCubico.set("PX",'texturas/mapasReflexion/cieloPX.png');
+            texturasMapaCubico.set("NX",'texturas/mapasReflexion/cieloNX.png');
+            texturasMapaCubico.set("PY",'texturas/mapasReflexion/cieloPY.png');
+            texturasMapaCubico.set("NY",'texturas/mapasReflexion/cieloNY.png');
+            texturasMapaCubico.set("PZ",'texturas/mapasReflexion/cieloPZ.png');
+            texturasMapaCubico.set("NZ",'texturas/mapasReflexion/cieloNZ.png');
 
-
-            
+      
             // Inicialización de WebGLd
             function initWebGL(){
 
@@ -368,17 +415,21 @@
 
             function initShaders() {
                 shadersColorUniforme = new UniformColorShaderHandler('uniformColor-vs','uniformColor-fs',gl);
-                shadersTexturas = new TextureShaderHandler('texture-vs','texture-fs',gl);                
-            } 
+                shadersTexturas = new TextureShaderHandler('texture-vs','texture-fs',gl);  
+                shadersReflexion = new ReflectionMapShaderHandler('reflection-vs','reflection-fs',gl);
+                    shadersReflexion.cargarTexturas(texturasMapaCubico);              
+            };
 
             function setupVertexShaderMatrix(){
                 shadersColorUniforme.setupVertexShaderMatrix();                
                 shadersTexturas.setupVertexShaderMatrix();
+                shadersReflexion.setupVertexShaderMatrix();
             }
 
             function setupFragmentShaderMatrix(){
                 shadersColorUniforme.setupFragmentShaderMatrix();
                 shadersTexturas.setupFragmentShaderMatrix();
+                shadersReflexion.setupFragmentShaderMatrix();
             }
 
             //Obs: Camara Drone provista por la cátedramColor-fs',gl);
@@ -410,7 +461,7 @@
             }
 
             function setupSectorPruebas(){
-                
+                //Playground para hacer pruebas
 
             }
 
@@ -432,12 +483,15 @@
                 switch(camaraActual){
                     case "cabina":
                         viewMatrix=grua.obtenerVistaCabina();
+                        shadersReflexion.changeWorldCameraPosition(grua.obtenerPosicionCabina());
                         break;
                     case "drone":
-                        viewMatrix=droneCam.getViewMatrix();
+                        viewMatrix = droneCam.getViewMatrix();
+                        shadersReflexion.changeWorldCameraPosition(droneCam.getPosition());
                         break;
                     case "orbital": 
                         viewMatrix = camaraOrbital.obtenerVistaOrbital();
+                        shadersReflexion.changeWorldCameraPosition(camaraOrbital.obtenerPosicionOjo());
                         break;    
                     default:
                         viewMatrix = droneCam.getViewMatrix();
