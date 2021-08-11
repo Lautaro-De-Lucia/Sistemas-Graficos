@@ -19,7 +19,7 @@ class Grua {
         //Se cargan las transformaciones
         this.cargarParametros();
 
-        //Singvaron  (no debe haber más de una grúa)
+        //Singleton  (no debe haber más de una grúa)
         if(typeof Grua.instance === "object"){return Grua.instance;}
 
     }
@@ -31,12 +31,17 @@ class Grua {
         for( var i = 65; i <= 65 + this.cantidadDePiezas ; i++ )
             this.piezas.push(this.generarPieza(String.fromCharCode(i)));
     }
-
-    //La grúa agrega sus piezas al arreglo de objetos de la escena
+    /*
     agregarALaEscena(objetos){
         this.cargarParametros();
         for(var i = 0; i <= this.cantidadDePiezas; i++)
             objetos.push(this.piezas[i]);
+    }
+    */
+    dibujar(){
+        //this.cargarParametros();
+        for(var i = 0; i <= this.cantidadDePiezas; i++)
+            this.piezas[i].dibujar();
     }
 
     trasladar(){
@@ -453,4 +458,10 @@ class Grua {
     	var cabina = this.piezas[3];
 	    return vec3.fromValues(cabina.posicionAcumulada[0],cabina.posicionAcumulada[1]+1.5,cabina.posicionAcumulada[2]);
     }   
+
+    dibujar(){
+        for (let index = 0; index < this.piezas.length; index++) 
+            this.piezas[index].dibujar(); 
+    }
+
 }

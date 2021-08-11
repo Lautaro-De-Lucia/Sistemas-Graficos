@@ -17,6 +17,7 @@ class Objeto3D {
         this.escalaAcumulada = vec3.fromValues(1,1,1); 
 
         this.reflexion = false;
+        this.distorsion = false;
         
         this.hijos = [];
 
@@ -26,12 +27,27 @@ class Objeto3D {
         this.textura = textura;
     }
 
+    tieneTextura(){
+        if (this.textura.estaCargada())
+            return true;
+        else
+            return false;    
+    }
+
     activarReflexion(){
         this.reflexion = true;
     }
 
+    activarDistorsion(){
+        this.distorsion = true;
+    }
+
     esReflexivo(){
         return this.reflexion;
+    }
+    
+    tieneDistorsion(){
+        return this.distorsion;
     }
 
     getMallaDeTriangulos() {
@@ -63,12 +79,15 @@ class Objeto3D {
 		mat4.multiply(m, matPadre, this.matrizModelado); 
 
         if (this.mallaDeTriangulos){
-            if(this.textura.estaCargada()){
+            if(this.tieneTextura()){
                 shadersTexturas.setShaderMatrix(m,this.textura);
                 dibujarMallaDeTriangulos(this.mallaDeTriangulos,shadersTexturas.getProgram()); 
             } if(this.esReflexivo()){
                 shadersReflexion.setShaderMatrix(m);
                 dibujarMallaDeTriangulos(this.mallaDeTriangulos,shadersReflexion.getProgram());
+            } if(this.tieneDistorsion()){
+                shadersDistorsion.setShaderMatrix(m);
+                dibujarMallaDeTriangulos(this.mallaDeTriangulos,shadersDistorsion.getProgram());
             } else{
                 shadersColorUniforme.setShaderMatrix(m,this.color);
                 dibujarMallaDeTriangulos(this.mallaDeTriangulos,shadersColorUniforme.getProgram());
@@ -95,6 +114,10 @@ class Objeto3D {
 
     quitarHijo() {
 		return this.hijos.pop();
+	}
+
+    quitarHijos() {
+		return this.hijos = 0;
 	}
 
     trasladar(x, y, z) {

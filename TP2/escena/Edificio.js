@@ -1,4 +1,8 @@
 class Edificio {
+    //La clase Edificio no es un Objeto 3D en si misma, sino que es un contenedor de piezas que SI son Objetos3D.
+    //La clase es responsable de colocar los objetos (los pisos) en la escena. 
+    //Así como el manejo de la cantidad y parámetros de estos.
+
     constructor(posicion = [30,0,0],numPisosT1=5,numPisosT2=5,alturaBase = 2,ventanasAncho = 10,ventanasLargo = 10,tamañoVentana=1.5,cantidadColumnas=4,colorBase = RGB(200,200,200),colorVentana = RGB(170,220,230),colorLosa = RGB(160,160,160),colorColumnas = RGB(150,150,150)) {
 
         this.posicion = posicion;
@@ -17,6 +21,10 @@ class Edificio {
 
         this.generarPuntosDeControl();
         this.generarEdificio();
+
+        //Singleton  (no debe haber más de un Edificio)
+        if(typeof Edificio.instance === "object"){return Edificio.instance;}
+        
     }
 
     generarEdificio(){
@@ -61,7 +69,12 @@ class Edificio {
         //quitamos el ascensor y la base
         this.edificio.quitarHijo();    
         this.edificio.quitarHijo();
-        this.edificio.quitarHijo(); //Y el easter egg :/
+        this.edificio.quitarHijo(); //Y el easter egg :D
+    }
+
+    trasladar(nuevaPosicion){
+        this.posicion = nuevaPosicion;
+        this.reset();
     }
 
     reset(){
@@ -208,6 +221,10 @@ class Edificio {
 
     agregarALaEscena(escena){
         escena.push(this.edificio);
+    }
+
+    dibujar(){
+        this.edificio.dibujar();
     }
 
 }

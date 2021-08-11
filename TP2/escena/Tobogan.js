@@ -10,12 +10,16 @@ class Tobogan {
         this.tobogan = new Objeto3D();
         this.generarTobogan();
 
+        //Singleton  (no debe haber más de un tobogán)
+        if(typeof Tobogan.instance === "object"){return Tobogan.instance;}
+
+
     }
 
     generarTobogan(){
         for(var i = 0; i < this.niveles; i++){
             var nuevaSeccion = new SeccionTobogan(this.alturaSeccion,this.ancho,this.color);
-            nuevaSeccion.trasladar(0,this.alturaSeccion*i,0);
+            nuevaSeccion.trasladar(this.posicion[0],this.posicion[1]+this.alturaSeccion*i,this.posicion[2]);
             this.tobogan.agregarHijo(nuevaSeccion);
         }
     }
@@ -34,8 +38,11 @@ class Tobogan {
     }
 
     agregarALaEscena(objetos){
-        this.tobogan.trasladar(this.posicion[0],this.posicion[1],this.posicion[2]);
         objetos.push(this.tobogan);
+    }
+
+    dibujar(){
+        this.tobogan.dibujar();
     }
 
 }
@@ -194,6 +201,7 @@ class SuperficieTobogan extends SuperficieBarrido {
             }
         }        
     }
+    
 
     setupBuffersBarrido(){
 

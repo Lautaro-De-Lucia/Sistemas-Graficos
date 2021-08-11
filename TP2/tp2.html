@@ -25,7 +25,7 @@
 
     	<center> 
             <div id='canvas' style="position:-ms-page">
-                <canvas id="my-canvas" width="1300" height="800">
+                <canvas id="my-canvas" width="1140" height="680">
                     Your browser does not support the HTML5 canvas element.
                 </canvas>   
             </div>    
@@ -91,6 +91,8 @@
             </right> 
         </center>
 
+<!-----------------------------------BIBLIOTECAS------------------------------------------------------->
+
         <!-- Bibliotecas externas -->
         <script src="glmatrix/gl-matrix.js"></script>
         <script src="glmatrix/gl-matrix-min.js"></script>
@@ -98,6 +100,7 @@
         <script src="utilidades/moduloGeometria.js"></script>
         <script src="utilidades/superficiesBarrido.js"></script>
         <script src="utilidades/curvas.js"></script>
+        <script src="utilidades/shaderHandlers.js"></script>
         <script src="utilidades/utilsEscena.js"></script>
         <!-- Objetos de la Escena -->
         <script src="escena/Grua.js"></script>
@@ -111,8 +114,9 @@
         <script src="camaras/camaraOrbital.js"></script>
         <script src="camaras/controladores/camaraControl.js"></script>
         
-        <!-- Vertex Shaders -->
-        
+<!-----------------------------------SHADERS----------------------------------------------------------->
+
+        <!--VS/FS Color Uniforme-->
         <script id="uniformColor-vs" type="x-shader/x-vertex">
 
             precision highp float;
@@ -174,6 +178,7 @@
 
         </script>
 
+        <!--VS/FS Texturas-->
         <script id="texture-vs" type="x-shader/x-vertex">
 
             precision highp float;
@@ -236,14 +241,14 @@
 
         </script>
 
-
+        <!--VS/FS Mapas de Reflexión-->
         <script id="reflection-vs" type="x-shader/x-vertex">
 
             precision highp float;
 
             attribute vec3 aVertexPosition;
             attribute vec3 aVertexNormal;
-            attribute vec2 aVertexUv; // aTextureCoordinate
+            attribute vec2 aVertexUv; 
 
             uniform mat4 modelMatrix;            
             uniform mat4 viewMatrix;
@@ -302,9 +307,151 @@
 
         </script>
 
-        <!-- WebGL -->
+        <!--VS/FS Distorsión-->
+        <script id="distorsion-vs" type="x-shader/x-vertex">
+
+            precision highp float;
+
+            attribute vec3 aVertexPosition;
+            attribute vec3 aVertexNormal;
+            attribute vec2 aVertexUv; // aTextureCoordinate
+
+            uniform mat4 modelMatrix;            
+            uniform mat4 viewMatrix;
+            uniform mat4 projMatrix;
+            uniform mat4 normalMatrix;
+
+            varying vec3 vPosWorld; 
+            varying vec3 vNormal;
+            varying vec2 vUv; // vTextureCoordinate
+
+            varying vec3 iluminacion;
+            
+            void main(void) {
+
+                vPosWorld=(modelMatrix*vec4(aVertexPosition,1.0)).xyz; // position in world coordinates
+                vNormal=(normalMatrix*vec4(aVertexNormal,1.0)).xyz; // normal in world coordinates
+                
+                gl_Position = projMatrix * viewMatrix * vec4(vPosWorld, 1.0);
+
+                vUv = aVertexUv; // pass the texture coordinate to the fragment shader
+
+                vec3 luzAmbiente = vec3(0.8, 0.7, 0.6);
+                vec3 colorLuzDireccional = vec3(1.0, 1.0, 1.0);
+                vec3 direccionLuz = normalize(vec3(-2.0, 1.0, 0.0));
+                float intensidadLuz = max(dot(vNormal.xyz, direccionLuz), 0.0);
+                iluminacion = luzAmbiente + (colorLuzDireccional * intensidadLuz);
+            }
+
+        </script>
+
+        <script id="distorsion-fs" type="x-shader/x-fragment">
+            
+            precision highp float;
+
+            uniform sampler2D uSamplerGrass; // uTexture1
+            uniform sampler2D uSamplerMoss; // uTexture2
+            uniform sampler2D uSamplerSandyGravel; // uTexture3
+            
+            varying vec3 vPosWorld;
+            varying vec3 vNormal;
+            varying vec2 vUv; // vTextureCoordinate
+
+            varying vec3 iluminacion;
+
+            vec3 mod289(vec3 x); //https://github.com/ashima/webgl-noise
+            vec2 mod289(vec2 x); //https://github.com/ashima/webgl-noise
+            vec3 permute(vec3 x); //https://github.com/ashima/webgl-noise
+            float snoise(vec2 v); //https://github.com/ashima/webgl-noise
+            
+            void main(void) {
+
+                vec3 pixelColorGrass = (texture2D(uSamplerGrass, vUv*200.0)).xyz;
+                vec3 pixelColorMoss = (texture2D(uSamplerMoss, vUv*120.0)).xyz;
+                vec3 pixelColorSandyGravel = (texture2D(uSamplerSandyGravel, vUv*110.0)).xyz;
+
+                float noise1a = snoise(vUv*100.0);
+                float noise1b = snoise(vUv*100.0);
+                float mask1 = mix(noise1a, noise1b, 0.6);
+
+                float noise2a = snoise(vUv*101.0);
+                float noise2b = snoise(vUv*70.0);
+                float mask2 = mix(noise2a, noise2b, 0.4);
+
+                vec3 pixelColor = mix(pixelColorGrass, pixelColorMoss, mask1);
+                
+                pixelColor = mix(pixelColor, pixelColorSandyGravel, mask2);
+                
+                gl_FragColor = vec4(pixelColor * iluminacion, 1.0);
+            }
+
+            vec3 mod289(vec3 x) {
+                
+                return x - floor(x * (1.0 / 289.0)) * 289.0;
+            }
+            
+            vec2 mod289(vec2 x) {
+                
+                return x - floor(x * (1.0 / 289.0)) * 289.0;
+            }
+            
+            vec3 permute(vec3 x) {
+                
+                return mod289(((x*34.0)+1.0)*x);
+            }
+            
+            float snoise(vec2 v) {
+
+                // Precompute values for skewed triangular grid
+                const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);
+                // ( (3.0-sqrt(3.0))/6.0 , 0.5*(sqrt(3.0)-1.0) , -1.0 + 2.0 * C.x , 1.0 / 41.0 )
+                                    
+                // First corner (x0)
+                vec2 i  = floor(v + dot(v, C.yy));
+                vec2 x0 = v - i + dot(i, C.xx);
+            
+                // Other two corners (x1, x2)
+                vec2 i1 = vec2(0.0);
+                i1 = (x0.x > x0.y)? vec2(1.0, 0.0):vec2(0.0, 1.0);
+                vec2 x1 = x0.xy + C.xx - i1;
+                vec2 x2 = x0.xy + C.zz;
+            
+                // Do some permutations to avoid
+                // truncation effects in permutation
+                i = mod289(i);
+                vec3 p = permute(permute(i.y + vec3(0.0, i1.y, 1.0)) + i.x + vec3(0.0, i1.x, 1.0));
+            
+                vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x1,x1), dot(x2,x2)), 0.0);
+                
+                m = m*m ;
+                m = m*m ;
+            
+                // Gradients:
+                //  41 pts uniformly over a line, mapped onto a diamond
+                //  The ring size 17*17 = 289 is close to a multiple of 41 (41*7 = 287)
+            
+                vec3 x = 2.0 * fract(p * C.www) - 1.0;
+                vec3 h = abs(x) - 0.5;
+                vec3 ox = floor(x + 0.5);
+                vec3 a0 = x - ox;
+            
+                // Normalise gradients implicitly by scaling m
+                // Approximation of: m *= inversesqrt(a0*a0 + h*h);
+                m *= 1.79284291400159 - 0.85373472095314 * (a0*a0+h*h);
+            
+                // Compute final noise value at P
+                vec3 g = vec3(0.0);
+                g.x  = a0.x  * x0.x  + h.x  * x0.y;
+                g.yz = a0.yz * vec2(x1.x,x2.x) + h.yz * vec2(x1.y,x2.y);
+                return 50.0 * dot(m, g);
+            }
+
+        </script>
+
+<!-----------------------------------WebGL----------------------------------------------------------->
         
         <script>
+        //------------------------------VARIABLES GLOBALES--------------------------------------------//
 
             // Elementos de glmatrix
             var vec2=glMatrix.vec2;
@@ -368,8 +515,8 @@
             URLsTexturas.set("esponja","texturas/WaterSponge01_2K_BaseColor_resultado.jpg");
             URLsTexturas.set("aluminio","texturas/tin.jpg");
             URLsTexturas.set("astronauta","texturas/AmericanHero01_2K_BaseColor_resultado.jpg");
+            URLsTexturas.set("asfaltoRoto","texturas/broken-asphalt.jpg");
             URLsTexturas.set("vidrio","texturas/glass-window.jpg");
-
             var texturasMapaCubico = new Map();
             texturasMapaCubico.set("PX",'texturas/mapasReflexion/cieloPX.png');
             texturasMapaCubico.set("NX",'texturas/mapasReflexion/cieloNX.png');
@@ -378,8 +525,8 @@
             texturasMapaCubico.set("PZ",'texturas/mapasReflexion/cieloPZ.png');
             texturasMapaCubico.set("NZ",'texturas/mapasReflexion/cieloNZ.png');
 
-      
-            // Inicialización de WebGLd
+        //-----------------------------SETUP WebGL-------------------------------------------------------//
+            
             function initWebGL(){
 
                 canvas = document.getElementById("my-canvas");  
@@ -397,7 +544,6 @@
                     setupFragmentShaderMatrix();
                     setupCamaras();
                     setupControles();
-                    setupSectorPruebas();
                     setupEscena();                    
                     start();   
 
@@ -417,22 +563,26 @@
                 shadersColorUniforme = new UniformColorShaderHandler('uniformColor-vs','uniformColor-fs',gl);
                 shadersTexturas = new TextureShaderHandler('texture-vs','texture-fs',gl);  
                 shadersReflexion = new ReflectionMapShaderHandler('reflection-vs','reflection-fs',gl);
-                    shadersReflexion.cargarTexturas(texturasMapaCubico);              
+                    shadersReflexion.cargarTexturas(texturasMapaCubico);            
+                shadersDistorsion = new DistortionShaderHandler('distorsion-vs','distorsion-fs',gl);
+                    shadersDistorsion.cargarTexturas(new Textura(URLsTexturas.get("pasto")),new Textura(URLsTexturas.get("musgo")),new Textura(URLsTexturas.get("grava")));
             };
 
             function setupVertexShaderMatrix(){
                 shadersColorUniforme.setupVertexShaderMatrix();                
                 shadersTexturas.setupVertexShaderMatrix();
                 shadersReflexion.setupVertexShaderMatrix();
+                shadersDistorsion.setupVertexShaderMatrix();
             }
 
             function setupFragmentShaderMatrix(){
                 shadersColorUniforme.setupFragmentShaderMatrix();
                 shadersTexturas.setupFragmentShaderMatrix();
                 shadersReflexion.setupFragmentShaderMatrix();
+                shadersDistorsion.setupFragmentShaderMatrix();
             }
 
-            //Obs: Camara Drone provista por la cátedramColor-fs',gl);
+            //Obs: Camara Drone provista por la cátedra;
             function setupDroneCamera() {
                 droneCam = new DroneCameraControl([0,0,10]);
                 
@@ -446,36 +596,26 @@
             }
 
             function setupControles() {
-
                 controladorGrua = new ControlGrua();
                 controladorTobogan = new ControlTobogan();
                 controladorEdificio = new ControlEdificio();
-
             }
 
             function setupCamaras() {
-                
                 setupDroneCamera(); 
-                camaraOrbital = new CamaraOrbital([0,0,0]);
-            
+                camaraOrbital = new CamaraOrbital([0,0,0]);            
             }
 
-            function setupSectorPruebas(){
-                //Playground para hacer pruebas
-
-            }
-
-            function setupEscena() {
-                
-                piso = new Cuadrado(150,RGB(120,150,120),new Textura(URLsTexturas.get("pasto"),[20,20]));
+            function setupEscena() {    
+                piso = new Cuadrado(150);
+                    piso.activarDistorsion();
                     escena.push(piso);
                 grua = new Grua();
-                    grua.agregarALaEscena(escena); 
+                    escena.push(grua);
                 tobogan = new Tobogan();
-                    tobogan.agregarALaEscena(escena);
+                    escena.push(tobogan);
                 edificio = new Edificio();
-                    edificio.agregarALaEscena(escena);        
-                
+                    escena.push(edificio);
             }
             
             function start(){                
@@ -497,7 +637,6 @@
                         viewMatrix = droneCam.getViewMatrix();
                         break;    
                 }
-
                 requestAnimationFrame(start);
                 updateControlers();
                 setupVertexShaderMatrix();
