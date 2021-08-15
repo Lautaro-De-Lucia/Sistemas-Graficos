@@ -370,12 +370,12 @@
                 vec3 pixelColorMoss = (texture2D(uSamplerMoss, vUv*120.0)).xyz;
                 vec3 pixelColorSandyGravel = (texture2D(uSamplerSandyGravel, vUv*110.0)).xyz;
 
-                float noise1a = snoise(vUv*100.0);
-                float noise1b = snoise(vUv*100.0);
+                float noise1a = snoise(vUv*500.0);
+                float noise1b = snoise(vUv*500.0);
                 float mask1 = mix(noise1a, noise1b, 0.6);
 
-                float noise2a = snoise(vUv*101.0);
-                float noise2b = snoise(vUv*70.0);
+                float noise2a = snoise(vUv*200.0);
+                float noise2b = snoise(vUv*140.0);
                 float mask2 = mix(noise2a, noise2b, 0.4);
 
                 vec3 pixelColor = mix(pixelColorGrass, pixelColorMoss, mask1);

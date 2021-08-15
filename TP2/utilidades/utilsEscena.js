@@ -71,7 +71,7 @@ class TexturaVacia {
     constructor(){
     }
     getEscala(){
-        return vec2.fromValues(10,10);
+        return vec2.fromValues(1,1);
     }
     estaCargada(){
         return false;

@@ -435,6 +435,17 @@ class SuperficieLosa extends SuperficieBarrido {
         vec3.scale(normalInferior, normalInferior, -1); 
         var uv = vec2.fromValues(0,0);
 
+        this.bufferPosicion.push(centroInferior[0]);
+        this.bufferPosicion.push(centroInferior[1]);
+        this.bufferPosicion.push(centroInferior[2]);
+
+        this.bufferNormal.push(normalInferior[0]);
+        this.bufferNormal.push(normalInferior[1]);
+        this.bufferNormal.push(normalInferior[2]);
+
+        this.bufferUV.push(uv[0]);
+        this.bufferUV.push(uv[1]);
+
         var matrizDeNivel = this.obtenerMatrizDeNivel(0);
 
         for (let j = 0; j < verticesPorNivel; j++) {
@@ -458,17 +469,6 @@ class SuperficieLosa extends SuperficieBarrido {
             this.bufferUV.push(uv[0]);
             this.bufferUV.push(uv[1]);
         }
-
-        this.bufferPosicion.push(centroInferior[0]);
-        this.bufferPosicion.push(centroInferior[1]);
-        this.bufferPosicion.push(centroInferior[2]);
-
-        this.bufferNormal.push(normalInferior[0]);
-        this.bufferNormal.push(normalInferior[1]);
-        this.bufferNormal.push(normalInferior[2]);
-
-        this.bufferUV.push(uv[0]);
-        this.bufferUV.push(uv[1]);
 
     }
 
@@ -596,8 +596,8 @@ class SuperficieLosa extends SuperficieBarrido {
 
     setupBuffersBarrido() {
 
-        this.agregarVerticesSuperficie();
         this.agregarVerticesTapaInferior();
+        this.agregarVerticesSuperficie();
         this.agregarVerticesTapaSuperior();
         this.generarIndexBuffer();
 
