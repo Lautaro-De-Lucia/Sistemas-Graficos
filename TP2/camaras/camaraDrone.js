@@ -7,6 +7,8 @@
         let DELTA_ROTACION=0.02;        
         let FACTOR_INERCIA=0.05;
 
+        let actualizado = true;
+
         let vec3=glMatrix.vec3;  
         let mat4=glMatrix.mat4;
 
@@ -38,7 +40,7 @@
         let camState=Object.assign({},camInitialState);
 
         document.addEventListener("keydown",function(e){
-
+            actualizado = true;
             switch ( e.key ) {
 
                 case "ArrowUp":  case "u": // up
@@ -80,7 +82,7 @@
         })
 
         document.addEventListener("keyup",function(e){
-
+            actualizado = true;
             switch ( e.key ) 
             {
                 case "ArrowUp":  case "u": case "ArrowDown": case "j": 
@@ -107,44 +109,56 @@
         })
 
         this.update=function(){
-            
-            camState.xVel+=(camState.xVelTarget-camState.xVel)*FACTOR_INERCIA;
-            camState.yVel+=(camState.yVelTarget-camState.yVel)*FACTOR_INERCIA;
-            camState.zVel+=(camState.zVelTarget-camState.zVel)*FACTOR_INERCIA;
+            if (actualizado == false 
+                && camState.xVel < 0.001 
+                && camState.yVel < 0.001 
+                && camState.zVel < 0.001 
+                && camState.xRotVel < 0.001 
+                && camState.yRotVel < 0.001)
+            {
+                return;
+            } else {
 
-            camState.xRotVel+=(camState.xRotVelTarget-camState.xRotVel)*FACTOR_INERCIA;
-            camState.yRotVel+=(camState.yRotVelTarget-camState.yRotVel)*FACTOR_INERCIA;
-            //camState.zRotVel+=(camState.zRotVelTarget-camState.zRotVel)*FACTOR_INERCIA;
+                refresh = true;
 
-            let translation=vec3.fromValues(-camState.xVel,camState.yVel,-camState.zVel);            
+                console.log("xVel: ",camState.xVel)
+                camState.xVel+=(camState.xVelTarget-camState.xVel)*FACTOR_INERCIA;
+                camState.yVel+=(camState.yVelTarget-camState.yVel)*FACTOR_INERCIA;
+                camState.zVel+=(camState.zVelTarget-camState.zVel)*FACTOR_INERCIA;
 
-            let rotIncrement=vec3.fromValues(camState.xRotVel,camState.yRotVel,camState.zRotVel);            
-            vec3.add(rotation,rotation,rotIncrement);
+                camState.xRotVel+=(camState.xRotVelTarget-camState.xRotVel)*FACTOR_INERCIA;
+                camState.yRotVel+=(camState.yRotVelTarget-camState.yRotVel)*FACTOR_INERCIA;
+                //camState.zRotVel+=(camState.zRotVelTarget-camState.zRotVel)*FACTOR_INERCIA;
 
-            rotation[0]=Math.min(Math.PI/8,Math.max(-Math.PI/8,rotation[0]));
-			
-            let rotationMatrix=mat4.create();		
+                let translation=vec3.fromValues(-camState.xVel,camState.yVel,-camState.zVel);            
 
-            mat4.rotateX(rotationMatrix,rotationMatrix,rotation[0]);
+                let rotIncrement=vec3.fromValues(camState.xRotVel,camState.yRotVel,camState.zRotVel);            
+                vec3.add(rotation,rotation,rotIncrement);
 
-            let yAxis=vec3.fromValues(0,1,0);
-            let xRotation=mat4.create();
-            mat4.rotateX(xRotation,xRotation,rotation[0]);
-            vec3.transformMat4(yAxis,yAxis,xRotation);
+                rotation[0]=Math.min(Math.PI/8,Math.max(-Math.PI/8,rotation[0]));
+                
+                let rotationMatrix=mat4.create();		
 
-            mat4.rotate(rotationMatrix,rotationMatrix,rotation[1],yAxis);
-            
-            //mat4.rotateY(rotationMatrix,rotationMatrix,rotation[1]);
-            //mat4.rotateZ(rotationMatrix,rotationMatrix,rotation[2]);
+                mat4.rotateX(rotationMatrix,rotationMatrix,rotation[0]);
 
-            vec3.transformMat4(translation,translation,rotationMatrix);
-            vec3.add(position,position,translation);
+                let yAxis=vec3.fromValues(0,1,0);
+                let xRotation=mat4.create();
+                mat4.rotateX(xRotation,xRotation,rotation[0]);
+                vec3.transformMat4(yAxis,yAxis,xRotation);
 
-            worldMatrix=mat4.create();
-            mat4.translate(worldMatrix,worldMatrix,position);        
-            mat4.multiply(worldMatrix,worldMatrix,rotationMatrix);
-            
-            
+                mat4.rotate(rotationMatrix,rotationMatrix,rotation[1],yAxis);
+                
+                //mat4.rotateY(rotationMatrix,rotationMatrix,rotation[1]);
+                //mat4.rotateZ(rotationMatrix,rotationMatrix,rotation[2]);
+
+                vec3.transformMat4(translation,translation,rotationMatrix);
+                vec3.add(position,position,translation);
+
+                worldMatrix=mat4.create();
+                mat4.translate(worldMatrix,worldMatrix,position);        
+                mat4.multiply(worldMatrix,worldMatrix,rotationMatrix);
+                actualizado = false;
+            }
         }
 
 

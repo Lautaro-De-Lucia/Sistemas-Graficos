@@ -1,5 +1,6 @@
 function ControlGrua() {
 
+    var actualizado = true;
     var delta = 0.1;
     var deltaSC = 0;
     var deltaBC = 0;
@@ -12,7 +13,7 @@ function ControlGrua() {
 
 
     document.addEventListener("keypress",function(control){
-
+        actualizado = true;
         switch ( control.key ) {
 
             case "W": 
@@ -43,24 +44,25 @@ function ControlGrua() {
     })
 
     this.update=function(){
-        grua.subirCabina(deltaSC/2);
-        deltaSC = 0;
-        grua.bajarCabina(deltaBC/2);
-        deltaBC = 0;
-        grua.rotacionCabina(deltaRHC/3);
-        deltaRHC = 0;
-        grua.rotacionCabina(-deltaRAC/3);
-        deltaRAC = 0;
-        grua.subirPlataforma(deltaSP);
-        deltaSP = 0;
-        grua.bajarPlataforma(deltaBP);
-        deltaBP = 0;
-        grua.rotacionHorariaBrazo(deltaRHB*3);
-        deltaRHB = 0;
-        grua.rotacionAntiHorariaBrazo(deltaRAB*3);
-        deltaRAB = 0;
-        easterEgg.rotar(0.1,0,0);        
+        if(actualizado == true){
+            refresh = true;
+            grua.subirCabina(deltaSC/2);
+            deltaSC = 0;
+            grua.bajarCabina(deltaBC/2);
+            deltaBC = 0;
+            grua.rotacionCabina(deltaRHC/3);
+            deltaRHC = 0;
+            grua.rotacionCabina(-deltaRAC/3);
+            deltaRAC = 0;
+            grua.subirPlataforma(deltaSP);
+            deltaSP = 0;
+            grua.bajarPlataforma(deltaBP);
+            deltaBP = 0;
+            grua.rotacionHorariaBrazo(deltaRHB*3);
+            deltaRHB = 0;
+            grua.rotacionAntiHorariaBrazo(deltaRAB*3);
+            deltaRAB = 0;     
+        } 
+        actualizado = false;
     }
-
-
 }

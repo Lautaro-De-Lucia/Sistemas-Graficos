@@ -1,9 +1,10 @@
 function ControlTobogan() {
 
+    var actualizado = true;
     var niveles = 5;
 
     document.addEventListener("keypress", function (control) {
-
+        actualizado = true;
         switch (control.key) {
 
             case "U":
@@ -18,7 +19,11 @@ function ControlTobogan() {
     })
 
     this.update = function () {
-        tobogan.setNiveles(niveles);
+        if (actualizado == true){
+            refresh = true;
+            tobogan.setNiveles(niveles);
+        }
+        actualizado = false;
     }
 
 

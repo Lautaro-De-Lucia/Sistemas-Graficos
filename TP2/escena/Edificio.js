@@ -54,13 +54,7 @@ class Edificio {
             nuevoPiso.trasladar(this.posicion[0],this.posicion[1],this.posicion[2]);
             this.edificio.agregarHijo(nuevoPiso);
         }
-
-        easterEgg2 = new Cubo(0.8,this.colorBase,new Textura(URLsTexturas.get("astronauta")));
-        easterEgg2.trasladar(this.posicion[0],this.posicion[1]+this.alturaBase+(this.tamañoVentana+this.tamañoVentana/5)*(this.numPisosT1+this.numPisosT2)+3*this.tamañoVentana/4,this.posicion[2]);
-        this.edificio.agregarHijo(easterEgg2);
-
     }
-
 
     limpiarEdificio(){
         //quitamos los pisos
@@ -69,7 +63,6 @@ class Edificio {
         //quitamos el ascensor y la base
         this.edificio.quitarHijo();    
         this.edificio.quitarHijo();
-        this.edificio.quitarHijo(); //Y el easter egg :D
     }
 
     trasladar(nuevaPosicion){

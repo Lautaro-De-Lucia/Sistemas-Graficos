@@ -139,9 +139,6 @@ class Grua {
             soportePoleaDerecha.trasladar(-0.3,1,0);
             soportePoleaDerecha.escalar(1,5,2);
              D.agregarHijo(soportePoleaDerecha);  
-        easterEgg = new Cuadrado(0.8,RGB(0,0,0),new Textura(URLsTexturas.get("esponja")));
-            easterEgg.rotar(0,0,-3.14/2);
-            D.agregarHijo(easterEgg);
         D.escalar(2,2,2);
     
         return D;

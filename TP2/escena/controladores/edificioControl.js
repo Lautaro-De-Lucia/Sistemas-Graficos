@@ -1,5 +1,6 @@
 function ControlEdificio() {
 
+    var actualizado = true;
     var numPisosT1 = 5;
     var numPisosT2 = 5;
     var ventanasAncho = 10;
@@ -7,7 +8,7 @@ function ControlEdificio() {
     var cantidadColumnas = 4;
 
     document.addEventListener("keypress", function (control) {
-
+        actualizado = true;
         switch (control.key) {
 
             case "R":
@@ -55,12 +56,15 @@ function ControlEdificio() {
     })
 
     this.update = function () {
-        edificio.setPisosInferiores(numPisosT1);
-        edificio.setPisosSuperiores(numPisosT2);
-        edificio.setCantidadDeColumnas(cantidadColumnas);
-        edificio.setVentanasALoAncho(ventanasAncho);
-        edificio.setVentanasALoLargo(ventanasLargo);
-        easterEgg2.rotar(0.05,-0.05,0.05);
+        if(actualizado == true){
+            refresh = true;
+            edificio.setPisosInferiores(numPisosT1);
+            edificio.setPisosSuperiores(numPisosT2);
+            edificio.setCantidadDeColumnas(cantidadColumnas);
+            edificio.setVentanasALoAncho(ventanasAncho);
+            edificio.setVentanasALoLargo(ventanasLargo);
+        }
+        actualizado = false;
     }
 
 

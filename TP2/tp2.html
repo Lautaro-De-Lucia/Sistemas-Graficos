@@ -22,30 +22,29 @@
         </style>
     </head>
     <body>
-
-    	<center> 
-            <div id='canvas' style="position:-ms-page">
-                <canvas id="my-canvas" width="1140" height="680">
+            <div id='title' style="position:absolute; top: 0px ; left:250px">   
+                <h1>
+                    Lautaro De Lucia - Sistemas Graficos - TP2
+                </h1>
+            </div>
+            <div id='canvas' style="position:absolute; top: 100px ;left:10px">
+                <canvas id="my-canvas" width="720" height="540">
                     Your browser does not support the HTML5 canvas element.
                 </canvas>   
             </div>    
-            <right>   
-                <h1>
-                    Controles<br>
-                </h1>	
-                <h2>
+            <div id='cameras' style="position:absolute; top: 100px ; left:1000px">   
+                <h3>
                     Camaras:<br>
-                </h2>
-                <h4>   
+                </h3>
+                <h5>   
                     Vista camara drone: 1<br>
                     Vista camara cabina: 2<br>
                     Vista orbital: 3<br>
-                    Activar/Desactivar Mapa de Reflexion: 4<br>
-                </h4>              
-                <h3>
-                Control de la CamaraDrone:<br>
-                </h3>
-                <h4> 
+                </h5>              
+                <h4>
+                Control Camara Drone:<br>
+                </h4>
+                <h5> 
                     Vista:<br><br>
                     Arriba: w<br>
                     Abajo: s<br>
@@ -56,40 +55,48 @@
                     Atras: ArrowDown<br>
                     Derecha: ArrowRight<br>
                     Izquierda: ArrowLeft<br>
-                </h4>
-                <h2>
-                    Objetos:<br>
-                </h2>  
+                </h5>
+            </div>
+            <div id='objects' style="position:absolute; top: 100px ; left:750px"> 
                 <h3>
-                Control de la Grua:<br>
-                </h3> 
+                    Objetos:<br>
+                </h3>  
                 <h4>
+                Control de la Grua:<br>
+                </h4> 
+                <h5>
                     Subir cabina: W<br>
                     Bajar cabina: S<br>
                     Rotar cabina: A/D<br>
                     Rotar brazo: Q/Z<br>
                     Subir/Bajar plataforma: E/C<br>
-                </h4> 
-                <h3>   
+                </h5> 
+                <h4>   
                 Control del Edificio:<br>
-                </h3>
-                <h4>
+                </h4>
+                <h5>
                     Pisos Inferiores: R/F<br>
                     Pisos Superiores: T/G<br>
                     Columnas: Y/H<br>
                     Ventanas: V/B/N/M<br>
-                <h4>  
-                <h3> 
+                <h5>  
+                <h4> 
                 Control del Tobogan:<br>
-                </h3>
-                <h4>  
+                </h4>
+                <h5>  
                     Niveles: U/J<br>
+                <h5>
+            </div> 
+            <div id='efectos' style="position:absolute; top: 520px ; left:820px" >
                 <h4>
+                    Activar/Desactivar Mapa de Reflexion: 4<br>
+                </h4>   
+            </div>
+            <div id='audio' style="position:absolute; top: 600px ; left:850px">
                 <audio controls playsinline autoplay loop> 
                     <source src = "musiquita/01 - Brian Eno.mp3">
                 </audio> 	
-            </right> 
-        </center>
+            </div>
 
 <!-----------------------------------BIBLIOTECAS------------------------------------------------------->
 
@@ -366,17 +373,17 @@
             
             void main(void) {
 
-                vec3 pixelColorGrass = (texture2D(uSamplerGrass, vUv*200.0)).xyz;
-                vec3 pixelColorMoss = (texture2D(uSamplerMoss, vUv*120.0)).xyz;
-                vec3 pixelColorSandyGravel = (texture2D(uSamplerSandyGravel, vUv*110.0)).xyz;
+                vec3 pixelColorGrass = (texture2D(uSamplerGrass, vUv*20.0)).xyz;
+                vec3 pixelColorMoss = (texture2D(uSamplerMoss, vUv*20.0)).xyz;
+                vec3 pixelColorSandyGravel = (texture2D(uSamplerSandyGravel, vUv*40.0)).xyz;
 
-                float noise1a = snoise(vUv*500.0);
-                float noise1b = snoise(vUv*500.0);
-                float mask1 = mix(noise1a, noise1b, 0.6);
+                float noise1a = snoise(vUv*5.0);
+                float noise1b = snoise(vUv*5.0);
+                float mask1 = mix(noise1a, noise1b, 0.5);
 
-                float noise2a = snoise(vUv*200.0);
-                float noise2b = snoise(vUv*140.0);
-                float mask2 = mix(noise2a, noise2b, 0.4);
+                float noise2a = snoise(vUv*10.0);
+                float noise2b = snoise(vUv*1.0);
+                float mask2 = mix(noise2a, noise2b, 0.5);
 
                 vec3 pixelColor = mix(pixelColorGrass, pixelColorMoss, mask1);
                 
@@ -443,7 +450,7 @@
                 vec3 g = vec3(0.0);
                 g.x  = a0.x  * x0.x  + h.x  * x0.y;
                 g.yz = a0.yz * vec2(x1.x,x2.x) + h.yz * vec2(x1.y,x2.y);
-                return 50.0 * dot(m, g);
+                return 100.0 * dot(m, g);
             }
 
         </script>
@@ -463,6 +470,8 @@
             // Atributos webGL
             var gl = null;
             var canvas = null;
+            var sleep = 0;
+            var refresh = true;
 
             // Shaders
             var shadersColorUniforme;
@@ -488,8 +497,6 @@
             var controladorTobogan;
             var edificio;
             var controladorEdificio;
-            var easterEgg;
-            var easterEgg2;
             var escena = [];
 
             // Camaras
@@ -544,7 +551,7 @@
                     setupFragmentShaderMatrix();
                     setupCamaras();
                     setupControles();
-                    setupEscena();                    
+                    setupEscena();                  
                     start();   
 
                 }else{    
@@ -553,9 +560,7 @@
             }
 
             function setupWebGL(){
-                gl.enable(gl.DEPTH_TEST);                                
-                gl.clearColor(0.1, 0.1, 0.2, 1.0);
-                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);     
+                gl.enable(gl.DEPTH_TEST);                                     
                 gl.viewport(0, 0, canvas.width, canvas.height);
             }
 
@@ -584,7 +589,7 @@
 
             //Obs: Camara Drone provista por la cátedra;
             function setupDroneCamera() {
-                droneCam = new DroneCameraControl([0,0,10]);
+                droneCam = new DroneCameraControl([10,20,20]);
                 
                 mat4.perspective(projMatrix,45, canvas.width / canvas.height, 0.1, 100.0);
                 
@@ -616,10 +621,18 @@
                     escena.push(tobogan);
                 edificio = new Edificio();
                     escena.push(edificio);
+                camaraActual = "orbital";
             }
             
-            function start(){                
-                
+            function start(){  
+                requestAnimationFrame(start);
+                updateView();              
+                updateControlers();
+                setupVertexShaderMatrix();
+                dibujarEscena();
+            }
+
+            function updateView(){
                 switch(camaraActual){
                     case "cabina":
                         viewMatrix=grua.obtenerVistaCabina();
@@ -637,10 +650,6 @@
                         viewMatrix = droneCam.getViewMatrix();
                         break;    
                 }
-                requestAnimationFrame(start);
-                updateControlers();
-                setupVertexShaderMatrix();
-                dibujarEscena();
             }
 
             function updateControlers(){
@@ -652,8 +661,14 @@
             }
 
             function dibujarEscena(){
-                for (let index = 0; index < escena.length; index++) 
-                    escena[index].dibujar(); 
+                sleep++;
+                if(refresh == true && sleep > 2){
+                    console.log("Dibujando")
+                    for (let index = 0; index < escena.length; index++) 
+                        escena[index].dibujar();
+                    sleep = 0;
+                }
+                refresh = false;
             }
             
             window.onload=initWebGL;
