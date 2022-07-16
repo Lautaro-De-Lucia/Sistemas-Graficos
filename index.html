@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-pink.css">    
+<title>Links website</title>
+<script src="https://unpkg.com/feather-icons"></script>
+<style>
+body {
+  background-image: url('old-canvas.jpg');
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+} /* The image used for background */
+
+.profile-name {
+  text-align: center;
+  color:rgb(0, 0, 0);
+  font-weight: bold;
+  font-family:'Courier New', Courier, monospace;
+  font-size: 28px;
+}
+
+.container {
+  width: 100%;
+  height: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.links {
+  text-align: center;
+  margin-top: 20px;
+  border: 1px solid rgb(0, 0, 0);
+  border-width: 2px;
+  padding: 10px;
+
+  width: 220px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+
+  border-radius: 20px;
+
+  font-size: 20px;
+}
+a {
+  text-decoration: none;
+
+  color: rgb(0, 0, 0);
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: rgb(255, 255, 255);
+  background-color: rgb(0, 0, 0);
+}
+
+.links-container {
+  display: flex;
+  flex-direction: column;
+  jusify-content: center;
+  align-items: center;
+}
+
+.links-container a {
+  width: 80%;
+}
+
+.w3-theme-l1:hover {
+  background-color: #f279a1 !important;
+}
+
+.margin-top-2 {
+  margin-top: 32px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.bottom {
+  width: 100%;
+  text-align: center;
+  width: auto;
+  font-weight: bolder;
+}
+
+.bottom span {
+  color: #ed4d82;
+}
+
+.bottom svg {
+  stroke: #ed4d82;
+  fill: #ed4d82;
+}
+
+@media (min-width: 768px) {
+  .link {
+    width: 100%;
+  }
+}
+@media (min-width: 576px) {
+  .container {
+    max-width: 540px;
+  }
+}
+</style>
+  </head>
+  <body>
+    <!-- Content container -->
+    <div class="container">
+
+      <!-- Image and name container. Change to your pictue here. -->
+      <div style="text-align: center">
+        <img src="minoan_rockstar.jpeg" class="w3-margin" alt="image" width="150px" height="150px" style="border-radius: 50%;">
+        <div class="profile-name">Lautaro De Lucia - Sistemas Gráficos</div>
+        <p style="font-weight: bolder;">Tareas y Trabajos Prácticos de la materia Sistemas Gráficos</p>
+        <p style="font-weight: bolder;">Facultad de Ingeniería - Universidad de Buenos Aires</p>
+      </div>
+
+      <!-- Links section 1. Replace the # inside of the "" with your links. -->
+      <h4 class="margin-top-2" style="text-align: center;">Letras 3D</h4>
+      <a href="EjercicioLetras/ejercicio1.html" class="links">Demo 1</a>
+      <a href="EjercicioLetras/ejercicio2.html" class="links">Demo 2</a>
+      <h4 class="margin-top-2" style="text-align: center;">Sistema Solar</h4>
+      <a href="ejercicioSistemaSolar/EjercicioSistemaSolar.html" class="links">Demo</a>
+      <h4 class="margin-top-2" style="text-align: center;">Planeta Tierra</h4>
+      <a href="demoPlanetaTierra/ejercicio-1.html" class="links">Demo 1</a>
+      <a href="demoPlanetaTierra/ejercicio-2.html" class="links">Demo 2</a>
+      <a href="demoPlanetaTierra/ejercicio-3.html" class="links">Demo 3</a>
+      <a href="demoPlanetaTierra/ejercicio-4.html" class="links">Demo 4</a>
+      <h4 class="margin-top-2" style="text-align: center;">Mapeo UV</h4>
+      <a href="ejercicioMapeoUV/cubo.html" class="links">Demo</a>
+      <h4 class="margin-top-2" style="text-align: center;">TP Integrador</h4>
+      <a href="TP1/tp1.html" class="links">Parte 1</a>
+      <a href="TP2/tp2.html" class="links">Parte 2</a>
+      <!-- Bottom section 3 -->
+      <div class="bottom margin-top-2 w3-padding w3-round">
+        <span style="vertical-align: 7px;"></span>
+      </div>
+
+    </div>
+    <script>
+      feather.replace()
+    </script>
+  </body>  
+</html>
